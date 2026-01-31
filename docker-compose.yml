@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: peerhive_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=peerhive
+    depends_on:
+      - mongo
+    networks:
+      - peerhive_net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: peerhive_frontend
+    ports:
+      - "3000:80"
+    volumes:
+      - ./src:/usr/share/nginx/html/src # Hot reload for JS
+      - ./index.html:/usr/share/nginx/html/index.html
+      - ./style.css:/usr/share/nginx/html/style.css
+    depends_on:
+      - backend
+    networks:
+      - peerhive_net
+
+  mongo:
+    image: mongo:latest
+    container_name: peerhive_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - peerhive_net
+
+volumes:
+  mongo_data:
+
+networks:
+  peerhive_net:
+    driver: bridge

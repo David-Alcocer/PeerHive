@@ -29,6 +29,7 @@ export function initAuthScreen() {
     setupFileUpload();
     setupPasswordStrength();
     setupForms();
+
 }
 
 function setupAuthTabs() {

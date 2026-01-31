@@ -61,7 +61,7 @@ export function renderAdvisorPanel() {
         if (listAdvisorRequests) {
             listAdvisorRequests.innerHTML = '';
 
-            // Should probably move this specific filter to RequestService but keeping it simple for now
+            // Should probably amove this specific filter to RequestService but keeping it simple for now
             const mySubjects = user.subjects || [];
             const relevantRequests = user.role === 'admin'
                 ? appState.requests

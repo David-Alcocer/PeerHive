@@ -1,7 +1,5 @@
-// ===============================
-// Configuración Global
-// ===============================
 
+export const API_URL = 'http://localhost:8000';
 export const STORAGE_KEY = "peerhive_demo_state_v6";
 export const THEME_KEY = "peerhive_theme";
 
