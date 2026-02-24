@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PeerHive</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f5f7fa;
+            text-align: center;
+            padding-top: 80px;
+        }
+        .card {
+            background: white;
+            width: 400px;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #0078d4;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+        .btn:hover {
+            background-color: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1> Bienvenido {{ name }}</h1>
+        <p> {{ email }}</p>
+        <a class="btn" href="/auth/logout">Cerrar sesión</a>
+    </div>
+</body>
+</html>
