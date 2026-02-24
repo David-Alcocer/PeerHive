@@ -98,10 +98,15 @@ class User(MongoBaseModel):
     email: EmailStr
     microsoftId: str
     role: RoleEnum
-    advisorSubjects: Optional[List[str]] = [] # Only for advisors
+    # --- Tus adiciones de Admin ---
+    is_verified: bool = False  
+    id_card_url: Optional[str] = None  
+    kardex_screenshot_url: Optional[str] = None  
+    # ------------------------------
+    advisorSubjects: Optional[List[str]] = []
     createdAt: datetime = Field(default_factory=datetime.now)
     updatedAt: datetime = Field(default_factory=datetime.now)
-
+    updatedAt: datetime = Field(default_factory=datetime.now)
 class Subject(MongoBaseModel):
     name: str
     description: Optional[str] = None

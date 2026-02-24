@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic_settings import BaseSettings
 import os
+from . import admin
 
 # Configuration
 class Settings(BaseSettings):
@@ -13,6 +14,7 @@ settings = Settings()
 
 # App Initialization
 app = FastAPI(title="PeerHive API", version="1.0.0")
+app.include_router(admin.router)
 
 # DBase Connection
 @app.on_event("startup")
