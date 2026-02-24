@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>PeerHive · Plataforma de Asesorías Académicas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Plataforma de asesorías académicas peer-to-peer para la comunidad UADY">
+
+  <!-- Fuente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Código de vinculación -->
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "u9p2l25g6j");
+  </script>
+</head>
+
+<body>
+  <!-- PANTALLA DE BIENVENIDA / AUTH -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <div class="logo-bee">
+            <i class="fa-solid fa-bee"></i>
+          </div>
+          <h1>PeerHive</h1>
+        </div>
+        <p class="auth-subtitle">Conectando estudiantes y asesores académicos</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Iniciar Sesión</button>
+        <button class="auth-tab" data-tab="register">Registrarse</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="login-tab" class="auth-content active">
+        <form id="form-login" class="auth-form">
+          <div class="input-group">
+            <label for="login-email" class="input-label">
+              <i class="fa-solid fa-envelope"></i>
+              Correo electrónico
+            </label>
+            <input id="login-email" type="email" class="input-field" placeholder="tu@correo.uady.mx" required />
+          </div>
+
+          <div class="input-group">
+            <label for="login-password" class="input-label">
+              <i class="fa-solid fa-lock"></i>
+              Contraseña
+            </label>
+            <input id="login-password" type="password" class="input-field" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" class="btn-primary full-width" id="login-submit-btn">
+            <span class="btn-text">Iniciar Sesión</span>
+            <div class="btn-loading" style="display: none;">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Verificando...
+            </div>
+          </button>
+        </form>
+
+        <div class="auth-divider">
+          <span>o usa una cuenta demo</span>
+        </div>
+
+        <div class="demo-accounts">
+          <button class="demo-account-btn" data-email="admin@demo.com" data-password="admin">
+            <div class="demo-account-icon admin">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="demo-account-info">
+              <strong>Administrador</strong>
+              <span>Acceso completo</span>
+            </div>
+          </button>
+
+          <button class="demo-account-btn" data-email="asesor@demo.com" data-password="asesor">
+            <div class="demo-account-icon advisor">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="demo-account-info">
+              <strong>Asesor</strong>
+              <span>Gestión de materias</span>
+            </div>
+          </button>
+
+          <button class="demo-account-btn" data-email="estudiante@demo.com" data-password="estudiante">
+            <div class="demo-account-icon student">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="demo-account-info">
+              <strong>Estudiante</strong>
+              <span>Solicitar asesorías</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- REGISTRO -->
+      <div id="register-tab" class="auth-content">
+        <form id="form-signup" class="auth-form">
+          <div class="input-group">
+            <label for="signup-name" class="input-label">
+              <i class="fa-solid fa-user"></i>
+              Nombre completo
+            </label>
+            <input id="signup-name" class="input-field" placeholder="Juan Pérez Hernández" required />
+          </div>
+
+          <div class="input-group">
+            <label for="signup-email" class="input-label">
+              <i class="fa-solid fa-envelope"></i>
+              Correo institucional UADY
+            </label>
+            <input id="signup-email" type="email" class="input-field" placeholder="a22200536@alumnos.uady.mx"
+              required />
+            <div class="input-hint">
+              Formato: a########@alumnos.uady.mx
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">
+              <i class="fa-solid fa-users"></i>
+              Tipo de cuenta
+            </label>
+            <div class="role-selection">
+              <label class="role-option">
+                <input type="radio" name="signup-type" value="student" checked />
+                <div class="role-card">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                  <span>Estudiante</span>
+                  <small>Solicitar asesorías</small>
+                </div>
+              </label>
+
+              <label class="role-option">
+                <input type="radio" name="signup-type" value="advisor" />
+                <div class="role-card">
+                  <i class="fa-solid fa-user-tie"></i>
+                  <span>Asesor</span>
+                  <small>Impartir asesorías</small>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Campos adicionales para asesor -->
+          <div id="signup-advisor-extra" class="advisor-extra" style="display: none;">
+            <div class="input-group">
+              <label for="signup-subject" class="input-label">
+                <i class="fa-solid fa-book"></i>
+                Materia a asesorar
+              </label>
+              <input id="signup-subject" class="input-field" placeholder="Ej. Algoritmia, Cálculo, Programación..." />
+            </div>
+
+            <div class="input-group">
+              <label for="signup-kardex" class="input-label">
+                <i class="fa-solid fa-file-pdf"></i>
+                Kardex académico (PDF)
+              </label>
+              <div class="file-upload-area" id="kardex-upload-area">
+                <i class="fa-solid fa-cloud-upload-alt"></i>
+                <p>Arrastra tu kardex aquí o haz clic para seleccionar</p>
+                <small>Máximo 2MB - Formato PDF</small>
+                <input id="signup-kardex" type="file" accept="application/pdf" class="file-input" />
+              </div>
+              <div id="kardex-preview" class="file-preview" style="display: none;"></div>
+            </div>
+
+            <div class="advisor-note">
+              <i class="fa-solid fa-info-circle"></i>
+              <p>Tu solicitud será revisada por un administrador. Recibirás una notificación por correo cuando sea
+                aprobada.</p>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="signup-password" class="input-label">
+              <i class="fa-solid fa-lock"></i>
+              Contraseña
+            </label>
+            <input id="signup-password" type="password" class="input-field" placeholder="••••••••" required />
+            <div class="password-strength" id="password-strength">
+              <div class="strength-bar"></div>
+              <span class="strength-text">Seguridad de la contraseña</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary full-width" id="signup-submit-btn">
+            <span class="btn-text">Crear Cuenta</span>
+            <div class="btn-loading" style="display: none;">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Registrando...
+            </div>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="auth-features">
+      <div class="feature-card">
+        <i class="fa-solid fa-users"></i>
+        <h3>Aprendizaje Colaborativo</h3>
+        <p>Conecta con compañeros y asesores para mejorar tu aprendizaje</p>
+      </div>
+      <div class="feature-card">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h3>Gestión de Sesiones</h3>
+        <p>Organiza y agenda tus sesiones de estudio fácilmente</p>
+      </div>
+      <div class="feature-card">
+        <i class="fa-solid fa-comments"></i>
+        <h3>Comunicación Directa</h3>
+        <p>Chat integrado para coordinar con asesores y estudiantes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL (oculta inicialmente) -->
+  <div class="app" style="display: none;">
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass-shell">
+      <div class="sidebar-logo">
+        <div class="logo-dot"></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <button class="nav-btn active" data-view="view-dashboard" title="Inicio">
+        <i class="fa-solid fa-house"></i>
+      </button>
+
+      <!-- SOLICITUDES (TICKET) -->
+      <button class="nav-btn" data-view="view-requests" title="Solicitudes">
+        <i class="fa-solid fa-ticket"></i>
+      </button>
+
+      <!-- CALENDARIO -->
+      <button class="nav-btn" data-view="view-calendar" title="Calendario">
+        <i class="fa-regular fa-calendar"></i>
+      </button>
+
+      <!-- PANEL ASESOR -->
+      <button class="nav-btn" data-view="view-advisor" title="Panel Asesor">
+        <i class="fa-solid fa-user-tie"></i>
+      </button>
+
+      <!-- CHAT -->
+      <button class="nav-btn" data-view="view-chat" title="Chat">
+        <i class="fa-solid fa-comments"></i>
+      </button>
+
+      <!-- AJUSTES -->
+      <button class="nav-btn" data-view="view-settings" title="Ajustes">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+
+      <!-- REPORTES ADMIN -->
+      <button class="nav-btn nav-admin-only" data-view="view-reports" title="Reportes (Admin)" style="display:none">
+        <i class="fa-solid fa-shield-halved"></i>
+      </button>
+
+      <div class="sidebar-spacer"></div>
+
+      <button class="nav-btn" id="btn-logout" title="Cerrar sesión">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- HEADER -->
+      <header class="topbar glass-shell">
+        <div class="topbar-left">
+          <h1 class="app-title">PeerHive</h1>
+          <p class="app-subtitle">Asesorías académicas remotas</p>
+        </div>
+
+        <div class="topbar-right">
+          <button id="theme-toggle" class="btn secondary btn-compact" type="button" aria-label="Cambiar tema">
+            <i class="fa-regular fa-sun"></i>
+            <span>Claro</span>
+          </button>
+
+          <div class="topbar-user" id="topbar-user" hidden>
+            <div class="avatar" id="avatar-initials">PH</div>
+            <div class="user-info">
+              <div class="user-name" id="user-name">Nombre</div>
+              <div class="user-meta">
+                <span id="user-email"></span>
+                <span class="pill" id="user-role"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- VISTAS -->
+
+      <!-- DASHBOARD -->
+      <main class="view" id="view-dashboard">
+        <section class="bento-grid">
+          <article class="card glass-card span-2">
+            <h2>Resumen</h2>
+            <p class="muted small">
+              Vista general de tus solicitudes y sesiones.
+            </p>
+
+            <div class="grid-3 mt-16">
+              <div class="mini-card glass-card" id="card-requests"></div>
+              <div class="mini-card glass-card" id="card-sessions"></div>
+              <div class="mini-card glass-card" id="card-role"></div>
+            </div>
+          </article>
+
+          <article class="card glass-card span-1">
+            <h3>Sesiones próximas</h3>
+            <div id="upcoming-sessions" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- SOLICITUDES -->
+      <main class="view" id="view-requests" hidden>
+        <section class="bento-grid">
+          <!-- Crear solicitud -->
+          <article class="card glass-card span-1">
+            <h2>
+              <i class="fa-solid fa-bee bee-heading-icon"></i>
+              Nueva solicitud
+            </h2>
+            <p class="muted small">
+              Creada por estudiantes o admin.
+            </p>
+
+            <form id="form-request" class="form-grid mt-12">
+              <div>
+                <label class="label" for="req-subject">Materia</label>
+                <input id="req-subject" class="input" required />
+              </div>
+              <div>
+                <label class="label" for="req-topic">Tema</label>
+                <input id="req-topic" class="input" required />
+              </div>
+              <div>
+                <label class="label" for="req-datetime">Fecha y hora</label>
+                <input id="req-datetime" type="datetime-local" class="input" required />
+              </div>
+              <div>
+                <label class="label" for="req-notes">Descripción</label>
+                <textarea id="req-notes" class="input" rows="3"></textarea>
+              </div>
+              <div class="row-right mt-8">
+                <button type="submit" class="btn primary" id="request-submit-btn">
+                  <span class="btn-text">Enviar solicitud</span>
+                  <div class="btn-loading" style="display: none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Procesando...
+                  </div>
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <!-- Mis solicitudes -->
+          <article class="card glass-card span-1">
+            <h2>Mis solicitudes</h2>
+            <div id="list-my-requests" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+
+          <!-- Solicitudes globales -->
+          <article class="card glass-card span-1" id="card-global-requests">
+            <h2>Solicitudes de usuarios</h2>
+            <p class="muted small">
+              Visible para asesores y admin.
+            </p>
+            <div id="list-all-requests" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- CALENDARIO -->
+      <main class="view" id="view-calendar" hidden>
+        <section class="bento-grid">
+          <article class="card glass-card span-2">
+            <h2>Calendario de sesiones</h2>
+            <p class="muted small">
+              Vista mensual estilo Teams. Las sesiones agendadas aparecen aquí.
+            </p>
+            <div id="calendar" class="calendar-container mt-12"></div>
+          </article>
+
+          <article class="card glass-card span-1">
+            <h3>Sesiones (lista)</h3>
+            <div id="list-sessions" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- PANEL ASESOR -->
+      <main class="view" id="view-advisor" hidden>
+        <section class="bento-grid">
+          <article class="card glass-card span-2">
+            <h2>Mis materias (LIS)</h2>
+            <p class="muted small">
+              Selecciona las asignaturas de la Licenciatura en Ingeniería de Software que impartes.
+            </p>
+
+            <form id="form-subjects" class="form-grid mt-12 subjects-grid">
+              <!-- Columna 1 -->
+              <label class="checkbox-row">
+                <input type="checkbox" value="Álgebra Intermedia" />
+                <span>Álgebra Intermedia</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Fundamentos de Ingeniería de Software" />
+                <span>Fundamentos de Ingeniería de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Programación Estructurada" />
+                <span>Programación Estructurada</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Cálculo Integral" />
+                <span>Cálculo Integral</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Programación Orientada a Objetos" />
+                <span>Programación Orientada a Objetos</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Teoría de Lenguajes de Programación" />
+                <span>Teoría de Lenguajes de Programación</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Construcción de Software" />
+                <span>Construcción de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Mantenimiento de Software" />
+                <span>Mantenimiento de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Requisitos de Software" />
+                <span>Requisitos de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Administración de Proyectos I" />
+                <span>Administración de Proyectos I</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Interacción Humano Computadora" />
+                <span>Interacción Humano Computadora</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Innovación Tecnológica" />
+                <span>Innovación Tecnológica</span>
+              </label>
+
+              <!-- Columna 2 -->
+              <label class="checkbox-row">
+                <input type="checkbox" value="Geometría Analítica" />
+                <span>Geometría Analítica</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Álgebra Superior" />
+                <span>Álgebra Superior</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Matemáticas Discretas" />
+                <span>Matemáticas Discretas</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Probabilidad" />
+                <span>Probabilidad</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Arquitectura y Organización de Computadoras" />
+                <span>Arquitectura y Organización de Computadoras</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Diseño de Software" />
+                <span>Diseño de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Arquitecturas de Software" />
+                <span>Arquitecturas de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Estructuras de Datos" />
+                <span>Estructuras de Datos</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Aseguramiento de la Calidad del Software" />
+                <span>Aseguramiento de la Calidad del Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Administración de Proyectos II" />
+                <span>Administración de Proyectos II</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Verificación y Validación de Software" />
+                <span>Verificación y Validación de Software</span>
+              </label>
+
+              <!-- Columna 3 -->
+              <label class="checkbox-row">
+                <input type="checkbox" value="Algoritmia" />
+                <span>Algoritmia</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Cálculo Diferencial" />
+                <span>Cálculo Diferencial</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Álgebra Lineal" />
+                <span>Álgebra Lineal</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Teoría de la Computación" />
+                <span>Teoría de la Computación</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Sistemas Operativos" />
+                <span>Sistemas Operativos</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Diseño de Bases de Datos" />
+                <span>Diseño de Bases de Datos</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Desarrollo de Aplicaciones Web" />
+                <span>Desarrollo de Aplicaciones Web</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Redes y Seguridad de Computadoras" />
+                <span>Redes y Seguridad de Computadoras</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Métricas de Software" />
+                <span>Métricas de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Experimentación en Ingeniería de Software" />
+                <span>Experimentación en Ingeniería de Software</span>
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" value="Sistemas Distribuidos" />
+                <span>Sistemas Distribuidos</span>
+              </label>
+
+              <div class="row-right mt-8">
+                <button type="submit" class="btn primary" id="subjects-submit-btn">
+                  <span class="btn-text">Guardar materias</span>
+                  <div class="btn-loading" style="display: none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Guardando...
+                  </div>
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card glass-card span-1">
+            <h2>Solicitudes para mí</h2>
+            <p class="muted small">
+              Solicitudes pendientes o sin asesor. (Asesor y Admin)
+            </p>
+            <div id="list-advisor-requests" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+
+          <article class="card glass-card span-1">
+            <h2>Mis sesiones</h2>
+            <div id="list-advisor-sessions" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- CHAT -->
+      <main class="view" id="view-chat" hidden>
+        <section class="bento-grid">
+          <article class="card glass-card span-1">
+            <h2>Chats</h2>
+            <p class="muted small">
+              Conversaciones privadas entre asesor y estudiante.
+            </p>
+            <div id="chat-list" class="list mt-12 small-scroll">
+              <!-- JS -->
+            </div>
+          </article>
+
+          <article class="card glass-card span-2">
+            <div class="chat-main">
+              <div class="chat-main-header">
+                <div class="chat-logo">
+                  <i class="fa-solid fa-comments"></i>
+                </div>
+                <div>
+                  <h2 id="chat-title">Selecciona un chat</h2>
+                  <p class="muted small" id="chat-subtitle">
+                    Cuando se acepte una solicitud se creará un chat privado.
+                  </p>
+                </div>
+              </div>
+
+              <div id="chat-messages" class="chat-messages small-scroll">
+                <!-- JS -->
+              </div>
+
+              <form id="chat-form" class="chat-input-row">
+                <input id="chat-input" class="input" type="text" placeholder="Escribe un mensaje..."
+                  autocomplete="off" />
+                <label for="chat-file" class="btn secondary btn-compact chat-attach-btn" title="Adjuntar archivo">
+                  <i class="fa-solid fa-paperclip"></i>
+                </label>
+                <input id="chat-file" type="file" class="chat-file-input" />
+                <button type="submit" class="btn primary" aria-label="Enviar mensaje" id="chat-submit-btn">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </form>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- AJUSTES -->
+      <main class="view" id="view-settings" hidden>
+        <section class="bento-grid">
+          <article class="card glass-card span-1">
+            <h2>Ajustes</h2>
+            <p class="muted small">
+              Modifica tu perfil y preferencias.
+            </p>
+            <div class="settings-profile">
+              <div class="settings-avatar" id="settings-avatar">
+                PH
+              </div>
+              <div>
+                <p class="small muted">Rol actual</p>
+                <p class="small" id="settings-role-label">Usuario</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="card glass-card span-2">
+            <h3>Información de la cuenta</h3>
+            <p class="muted small">
+              Estos cambios aplican solo en esta demo local de PeerHive.
+            </p>
+
+            <form id="form-settings" class="form-grid mt-12">
+              <div>
+                <label class="label" for="settings-name">Nombre</label>
+                <input id="settings-name" class="input" required />
+              </div>
+
+              <div>
+                <label class="label" for="settings-email">Correo</label>
+                <input id="settings-email" type="email" class="input" required />
+              </div>
+
+              <div>
+                <label class="label" for="settings-password">Nueva contraseña (opcional)</label>
+                <input id="settings-password" type="password" class="input"
+                  placeholder="Déjalo vacío para no cambiarla" />
+              </div>
+
+              <div class="row-right mt-8">
+                <button type="submit" class="btn primary" id="settings-submit-btn">
+                  <span class="btn-text">Guardar cambios</span>
+                  <div class="btn-loading" style="display: none;">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Guardando...
+                  </div>
+                </button>
+              </div>
+            </form>
+          </article>
+        </section>
+      </main>
+
+      <!-- REPORTES (ADMIN) -->
+      <main class="view" id="view-reports" hidden>
+        <section class="bento-grid">
+          <article class="card glass-card span-1">
+            <h2>Reportes</h2>
+            <p class="muted small">
+              Solo visible para el Administrador.
+            </p>
+            <div class="list mt-12" id="reports-list">
+              <!-- JS -->
+            </div>
+
+            <h3 class="mt-16 small">Solicitudes de asesor</h3>
+            <div class="list mt-8 small-scroll" id="advisor-requests-list">
+              <!-- JS -->
+            </div>
+          </article>
+
+          <article class="card glass-card span-2">
+            <h3>Gestión de Usuarios</h3>
+            <p class="muted small">
+              Administra roles y permisos de usuarios registrados.
+            </p>
+            <div class="row mt-8">
+              <input id="contact-search" class="input" type="search" placeholder="Buscar por nombre, correo o rol..." />
+            </div>
+            <div id="contact-list" class="list mt-12 small-scroll contact-management">
+              <!-- JS -->
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
