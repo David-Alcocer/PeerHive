@@ -1,8 +1,12 @@
+import logging
 import msal
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
-from .config import AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AUTHORITY, REDIRECT_URI, SCOPES
+from .config import AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AUTHORITY, REDIRECT_URI, SCOPES, encrypt_token
 from urllib.parse import quote
+
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 def build_msal_app():
@@ -48,10 +52,16 @@ async def callback(request: Request):
         "tid": claims.get("tid"),
         "oid": claims.get("oid"),
     }
+    # Guardar el access_token de Microsoft Graph cifrado para uso en servicios
+    access_token = result.get("access_token")
+    if access_token:
+        try:
+            request.session["ms_graph_token"] = encrypt_token(access_token)
+        except Exception as e:
+            logger.error(f"Error cifrando access_token de Graph: {e}")
+            # Continuar sin token cifrado — las funciones de Graph no estarán disponibles
+            # pero el login básico sigue funcionando.
     return RedirectResponse("/app")
-from urllib.parse import quote
-
-from urllib.parse import quote
 
 @router.get("/logout")
 async def logout(request: Request):

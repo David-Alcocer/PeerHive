@@ -49,3 +49,21 @@ def protected(request: Request):
 def me(request: Request):
     return {"user": request.session.get("user")}
 
+
+@app.get("/auth/me")
+async def get_current_user(request: Request):
+    """
+    Obtiene el usuario actual autenticado y el estado de Microsoft Graph.
+    
+    Este endpoint es necesario para que el frontend verifique si el usuario
+    tiene una sesión activa con Microsoft Graph (para Calendar/Teams).
+    """
+    user = request.session.get("user")
+    has_token = bool(request.session.get("ms_graph_token"))
+    
+    return {
+        "user": user,
+        "authenticated": bool(user),
+        "has_graph_token": has_token
+    }
+
