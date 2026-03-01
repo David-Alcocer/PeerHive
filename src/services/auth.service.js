@@ -1,6 +1,7 @@
 
 import { appState, findUserByEmail, getCurrentUser } from '../store/state.js';
 import { hashPassword, verifyPassword, uid } from '../utils/helpers.js';
+import { API_URL } from '../api/config.js';
 
 export const AuthService = {
     async login(email, password) {
@@ -77,3 +78,26 @@ export const AuthService = {
         });
     }
 };
+
+// ===============================
+// Funciones auxiliares para Microsoft Graph
+// ===============================
+
+/**
+ * Verifica si el usuario tiene una sesión activa con Microsoft Graph en el backend.
+ * El token NUNCA sale del backend — el frontend solo verifica el estado de autenticación.
+ */
+export async function checkGraphAuthStatus() {
+    try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        if (!response.ok) return false;
+        const data = await response.json();
+        return data.has_graph_token === true;
+    } catch (error) {
+        console.warn('Error verificando estado de autenticación Graph:', error.message);
+        return false;
+    }
+}
