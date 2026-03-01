@@ -16,11 +16,11 @@ Este changelog documenta todos los cambios implementados para integrar Microsoft
 **Propósito:** Autenticación con Microsoft Entra ID
 
 **Cambios:**
-- ✅ Importación de módulo `logging`
-- ✅ Importación de función `encrypt_token` desde `config.py`
-- ✅ Agregado `logger` para registro de errores
-- ✅ **NUEVO:** Cifrado del `access_token` de Microsoft Graph antes de guardarlo en sesión
-- ✅ Manejo de errores en el cifrado de tokens
+-  Importación de módulo `logging`
+-  Importación de función `encrypt_token` desde `config.py`
+-  Agregado `logger` para registro de errores
+-  **NUEVO:** Cifrado del `access_token` de Microsoft Graph antes de guardarlo en sesión
+-  Manejo de errores en el cifrado de tokens
 
 ```python
 # Nuevo código agregado
@@ -38,16 +38,16 @@ if access_token:
 **Propósito:** Configuración centralizada y cifrado de tokens
 
 **Cambios:**
-- ✅ Importaciones: `logging`, `base64`, `hashlib`, `cryptography.fernet`
-- ✅ **NUEVO:** Derivación de clave de cifrado (SHA256 + base64 URL-safe)
-- ✅ **NUEVO:** Instancia singleton de Fernet para cifrado
-- ✅ **NUEVO:** scopes de Graph expandidos:
+-  Importaciones: `logging`, `base64`, `hashlib`, `cryptography.fernet`
+-  **NUEVO:** Derivación de clave de cifrado (SHA256 + base64 URL-safe)
+-  **NUEVO:** Instancia singleton de Fernet para cifrado
+-  **NUEVO:** scopes de Graph expandidos:
   - `User.Read`
   - `Calendars.ReadWrite`
   - `OnlineMeetings.ReadWrite`
   - `OnlineMeetingArtifact.Read.All`
-- ✅ **NUEVO:** Función `encrypt_token(token: str) -> str`
-- ✅ **NUEVO:** Función `decrypt_token(encrypted_token: str) -> str`
+-  **NUEVO:** Función `encrypt_token(token: str) -> str`
+-  **NUEVO:** Función `decrypt_token(encrypted_token: str) -> str`
 
 ```python
 # Clave de cifrado para tokens
@@ -64,7 +64,7 @@ _fernet = Fernet(TOKEN_ENCRYPTION_KEY)
 **Propósito:** Punto de entrada de la aplicación
 
 **Cambios:**
-- ✅ **NUEVO ENDPOINT:** `/auth/me` - Consulta estado de autenticación Graph
+-  **NUEVO ENDPOINT:** `/auth/me` - Consulta estado de autenticación Graph
 
 ```python
 @app.get("/auth/me")
@@ -84,13 +84,13 @@ async def get_current_user(request: Request):
 **Propósito:** API REST del backend con integración Graph
 
 **Cambios mayores:**
-- ✅ Importaciones de Microsoft Graph: `msal`, `requests`, `logging`, `base64`, `hashlib`
-- ✅ **NUEVO:** Middleware de sesiones (Starlette)
-- ✅ **NUEVO:** Modelo Pydantic `CalendarEventCreate`
-- ✅ **NUEVO:** Modelo Pydantic `TeamsMeetingCreate`
-- ✅ **NUEVO:** Funciones de cifrado/descifrado de tokens
-- ✅ **NUEVO:** Función `_is_valid_jwt_format()` para validación de tokens
-- ✅ **NUEVO:** Función `get_access_token()` - Extrae token del header o sesión
+-  Importaciones de Microsoft Graph: `msal`, `requests`, `logging`, `base64`, `hashlib`
+-  **NUEVO:** Middleware de sesiones (Starlette)
+-  **NUEVO:** Modelo Pydantic `CalendarEventCreate`
+-  **NUEVO:** Modelo Pydantic `TeamsMeetingCreate`
+-  **NUEVO:** Funciones de cifrado/descifrado de tokens
+-  **NUEVO:** Función `_is_valid_jwt_format()` para validación de tokens
+-  **NUEVO:** Función `get_access_token()` - Extrae token del header o sesión
 
 **NUEVOS ENDPOINTS:**
 
@@ -138,8 +138,8 @@ export const GRAPH_API_URL = 'https://graph.microsoft.com/v1.0';
 **Propósito:** Servicio de autenticación del frontend
 
 **Nuevas funciones:**
-- ✅ Importación de `API_URL`
-- ✅ Función `checkGraphAuthStatus()` - Verifica si el usuario tiene sesión Graph activa
+-  Importación de `API_URL`
+-  Función `checkGraphAuthStatus()` - Verifica si el usuario tiene sesión Graph activa
 
 ```javascript
 export async function checkGraphAuthStatus() {
@@ -164,10 +164,10 @@ export async function checkGraphAuthStatus() {
 **Propósito:** Servicio de solicitudes y gestión de calendar/teams
 
 **Nuevos métodos:**
-- ✅ `getCalendarEvents(startDate, endDate)` - Obtiene eventos de Outlook
-- ✅ `createCalendarEvent(eventData)` - Crea evento en Outlook
-- ✅ `createTeamsMeeting(subject, startTime, endTime)` - Crea reunión de Teams
-- ✅ `getMeetingAttendance(meetingId)` - Obtiene asistencia de reunión
+-  `getCalendarEvents(startDate, endDate)` - Obtiene eventos de Outlook
+-  `createCalendarEvent(eventData)` - Crea evento en Outlook
+-  `createTeamsMeeting(subject, startTime, endTime)` - Crea reunión de Teams
+-  `getMeetingAttendance(meetingId)` - Obtiene asistencia de reunión
 
 ---
 
@@ -175,11 +175,11 @@ export async function checkGraphAuthStatus() {
 **Propósito:** Interfaz de calendario
 
 **Cambios:**
-- ✅ Importaciones de `RequestService` y `API_BASE_URL`
-- ✅ **NUEVO:** Función `loadGraphCalendarEvents()` - Carga eventos de Outlook
-- ✅ **NUEVO:** Función `renderSessionList()` - Renderiza lista de sesiones
-- ✅ Renderizado de eventos de Outlook con color azul (#2196F3)
-- ✅ Renderizado de sesiones locales con color verde (#4CAF50)
+-  Importaciones de `RequestService` y `API_BASE_URL`
+-  **NUEVO:** Función `loadGraphCalendarEvents()` - Carga eventos de Outlook
+-  **NUEVO:** Función `renderSessionList()` - Renderiza lista de sesiones
+-  Renderizado de eventos de Outlook con color azul (#2196F3)
+-  Renderizado de sesiones locales con color verde (#4CAF50)
 
 ---
 
@@ -187,11 +187,11 @@ export async function checkGraphAuthStatus() {
 **Propósito:** Interfaz de solicitudes
 
 **Cambios en `assignRequestToAdvisor()`:**
-- ✅ Obtención de datos de la solicitud
-- ✅ Creación automática de reunión de Teams (no bloqueante)
-- ✅ Creación automática de evento en calendario (no bloqueante)
-- ✅ Actualización de sesión con link de Teams dinámico
-- ✅ Mensajes de toast diferenciados según éxito/parcial/fallo
+-  Obtención de datos de la solicitud
+-  Creación automática de reunión de Teams (no bloqueante)
+-  Creación automática de evento en calendario (no bloqueante)
+-  Actualización de sesión con link de Teams dinámico
+-  Mensajes de toast diferenciados según éxito/parcial/fallo
 
 ---
 
@@ -221,14 +221,14 @@ export async function checkGraphAuthStatus() {
 
 ## Cambios en Seguridad
 
-### ✅ Implementado
+###  Implementado
 1. **Cifrado de tokens:** Tokens de Microsoft Graph almacenados cifrados con Fernet
 2. **Validación de JWT:** Validación de formato JWT antes de usar tokens
 3. **CORS restrictivo:** Origen limitado a `localhost:3000` y `127.0.0.1:3000`
 4. **Logging de errores:** Registro de errores de cifrado y autenticación
 5. **Manejo de errores:** Operaciones secundarias (Teams/Calendar) no bloquean el flujo principal
 
-### ⚠️ Notas de Seguridad
+###  Notas de Seguridad
 1. **Clave de cifrado:** En desarrollo usa `SESSION_SECRET_KEY` como fallback. En producción configurar `TOKEN_ENCRYPTION_KEY_RAW`
 2. **Secret Key:** El backend usa `SECRET_KEY` separada de `SESSION_SECRET_KEY`
 
