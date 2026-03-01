@@ -4,7 +4,7 @@ Este documento detalla la arquitectura, los cambios realizados, el estado actual
 
 ---
 
-## 🏗 Arquitectura de la Integración
+##  Arquitectura de la Integración
 
 La integración se diseñó para conectar el sistema de asesorías local de PeerHive con el ecosistema de productividad de Microsoft 365, automatizando la creación de reuniones y eventos en el calendario.
 
@@ -28,7 +28,7 @@ La integración se diseñó para conectar el sistema de asesorías local de Peer
 
 ---
 
-## 📝 Resumen de Cambios y Adiciones
+##  Resumen de Cambios y Adiciones
 
 ### Módulos y Paquetes Nuevos
 - Se instalaron dependencias críticas: `msal` (Autenticación Microsoft), `cryptography` (Cifrado Fernet), `starlette` (Manejo robusto de sesiones) y `itsdangerous` (Firma de sesiones).
@@ -48,7 +48,7 @@ La integración se diseñó para conectar el sistema de asesorías local de Peer
 
 ---
 
-## ⚠️ Limitaciones y Advertencias (Estado Actual)
+##  Limitaciones y Advertencias (Estado Actual)
 
 1. **Credenciales en Desarrollo:**
    - El archivo `.env` actualmente posee valores *dummy* (falsos) como `AZURE_CLIENT_ID=test-client-id`.
@@ -72,7 +72,7 @@ La integración se diseñó para conectar el sistema de asesorías local de Peer
 
 ---
 
-## 🛠 Cosas por Mejorar (Próximos Pasos)
+##  Cosas por Mejorar (Próximos Pasos)
 
 1. **Refactorización de Autenticación y Cifrado (Prioridad Alta):**
    - Extraer la lógica de autenticación JWT/Fernet a un paquete compartido (ej. `shared/security.py`) que sea importado tanto por `app/` como por `backend/app/` para respetar el principio DRY.
