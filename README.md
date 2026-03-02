@@ -1,72 +1,130 @@
-# PeerHive – Backend con Autenticación Microsoft
-## Descripción General
-En este proyecto se desarrolló un backend utilizando FastAPI que implementa autenticación con Microsoft Entra ID (OAuth 2.0 – Authorization Code Flow), manejo de sesiones seguras y documentación automática de la API mediante Swagger (OpenAPI 3.0).
-El objetivo fue construir la base de una plataforma de asesorías académicas, donde únicamente usuarios autenticados puedan acceder a funcionalidades protegidas del sistema.
+# 🐝 PeerHive
 
-## Estructura del proyecto
-```bash
-PeerHive/
-│
-├── app/
-│   ├── main.py        # Configuración principal de la aplicación
-│   ├── auth.py        # Lógica de autenticación con Microsoft Entra
-│   ├── asesorias.py   # Endpoints CRUD de asesorías
-│   ├── config.py      # Variables de entorno y configuración
-│   └── __init__.py
-│
-├── templates/
-│   └── app.html       # Vista protegida para usuarios autenticados
-│
-├── .env               # Credenciales y configuración sensible
-└── README.md
- ```
-## Proceso
-1. Redirigir al usuario a Microsoft para autenticación.
-2. Recibir un código de autorización en el callback.
-3. Intercambiar el código por un token usando la librería MSAL.
-4. Extraer información del usuario.
-5. Guardar los datos del usuario en sesión.
-6. Proteger rutas verificando la existencia de sesión activa.
-### Esto garantiza:
-1. Validación segura mediante state (protección CSRF).
-2. Manejo de sesión con cookies.
-3. Protección de rutas privadas.
+<p align="center">
+  <img src="images/PeerHive.png" width="240" alt="Logo PeerHive">
+</p>
 
-## Documentación de Endpoints (Swagger)
-Se implementó documentación automática usando OpenAPI.
+<!-- Botón al branch main de PeerHive -->
+<p align="center">
+  <a href="https://github.com/David-Alcocer/PeerHive/tree/main" target="_blank" rel="noopener">
+    <img alt="Ir a main" src="https://img.shields.io/badge/Ir%20al%20branch%20main-000000?style=for-the-badge&logo=github">
+  </a>
+</p>
+
+**PeerHive** es un sistema backend para la **administración de asesorías académicas**, diseñado para gestionar usuarios, sesiones, tickets de clases y comunicación en tiempo real entre estudiantes y asesores.
+
+Este proyecto surge como evolución del frontend desarrollado en el curso de Fundamentos de Software:
+
+🔗 Proyecto frontend original:  
+[Equipo-6-Fundamentos-De-Software](https://github.com/David-Alcocer/Equipo-6-Fundamentos-De-Software)
+
+🔗 Repositorio actual (Backend):  
+[PeerHive](https://github.com/David-Alcocer/PeerHive)
+
+---
+
+## 📌 ¿Qué es PeerHive?
+
+PeerHive es una API REST construida con [FastAPI](https://fastapi.tiangolo.com/) que permite:
+
+- 🔐 Autenticación con [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
+- 👤 Gestión y CRUD de usuarios
+- 🎫 Creación y asignación de tickets de asesorías
+- 💬 Sistema de chat en tiempo real con WebSockets
+- 🗓️ Gestión de calendario basado en relaciones usuario-estudiante
+- 🛡️ Administración de sesiones y verificación de roles
+- 📡 Integración con APIs externas como [Microsoft Graph](https://learn.microsoft.com/graph/overview)
+
+PeerHive funciona como el **motor lógico y de seguridad** que puede ser consumido por cualquier cliente frontend (web, móvil o SPA).
+
+---
+
+## 🎯 Objetivos del Backend
+
+### 1️⃣ Centralizar la lógica de negocio
+Separar completamente la lógica del frontend para garantizar escalabilidad y mantenibilidad.
+
+### 2️⃣ Implementar autenticación segura
+Integración con:
+- [OAuth 2.0](https://oauth.net/2/)
+- [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
+
+Para asegurar inicio de sesión institucional y protección de rutas.
+
+### 3️⃣ Gestionar el ciclo completo de asesorías
+
+- Crear tickets de clase
+- Asignar asesores
+- Registrar estado de asesorías
+- Administrar usuarios (estudiantes, asesores, admins)
+
+### 4️⃣ Implementar comunicación en tiempo real
+
+Uso de:
+- [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+- Soporte nativo en [FastAPI](https://fastapi.tiangolo.com/advanced/websockets/)
+
+Para chat entre usuarios dentro de la plataforma.
+
+### 5️⃣ Exponer una API documentada automáticamente
+
+Documentación interactiva generada con:
+- [OpenAPI](https://www.openapis.org/)
+- [Swagger UI](https://swagger.io/tools/swagger-ui/)
+
 Disponible en:
-```bash
-/docs (Swagger UI interactivo
-/redoc
-/openapi.json
- ```
-### Características implementadas:
+- `/docs`
+- `/redoc`
 
-1. Organización de endpoints por módulos usando APIRouter.
-2. Modelos tipados con Pydantic.
-3. Validación automática de datos.
-4. Soporte para métodos HTTP: GET, POST y DELETE.
-5. Esquemas JSON generados automáticamente.
-6. Interfaz interactiva para probar endpoints desde el navegador.
-## Endpoints Principales
-### Autenticación
-```bash
-GET /auth/login
+---
 
-GET /auth/callback
+## 🏗️ Arquitectura
 
-GET /auth/logout
+PeerHive sigue una arquitectura modular basada en:
 
-Gestión de Asesorías
+- API REST
+- Controladores separados por dominio
+- Validación con Pydantic
+- Gestión de configuración con variables de entorno
+- Soporte para contenedores con [Docker](https://www.docker.com/)
 
-GET /api/asesorias
+---
 
-POST /api/asesorias
+## 🔐 Seguridad
 
-DELETE /api/asesorias/{id}
+- Autenticación basada en tokens OAuth2
+- Manejo de sesiones
+- Rutas protegidas
+- Separación de roles (usuario / asesor / admin)
+- Integración con Microsoft Graph API
 
-Ruta Protegida
-GET /app
- ```
- ** freddie Uitzil **
+---
+
+## 🚀 Tecnologías utilizadas
+
+- [Python](https://www.python.org/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Uvicorn](https://www.uvicorn.org/)
+- [Pydantic](https://docs.pydantic.dev/)
+- [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
+- [Microsoft Graph API](https://learn.microsoft.com/graph/overview)
+- [Docker](https://www.docker.com/)
+
+---
+
+## 🧩 Enfoque del Proyecto
+
+PeerHive está diseñado como:
+
+- Backend independiente
+- Escalable
+- Modular
+- Preparado para integrarse con múltiples frontends
+- Enfocado en buenas prácticas de autenticación y arquitectura API
+
+---
+
+## 📄 Licencia
+
+Pendiente de definir.
 
