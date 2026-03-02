@@ -1,6 +1,7 @@
 
 import { appState, setChatId } from '../store/state.js';
 import { uid, generateTeamsChannelLink } from '../utils/helpers.js';
+import { API_BASE_URL } from '../api/config.js';
 
 export const RequestService = {
     async create(requestData) {
@@ -85,5 +86,109 @@ export const RequestService = {
             return appState.requests.filter(r => r.advisorId === user.id || !r.advisorId);
         }
         return appState.requests; // Admin sees all
+    },
+
+    // ==============================
+    // Métodos de API - Calendario
+    // ==============================
+
+    async getCalendarEvents(startDate, endDate) {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/calendar/events?start_date=${startDate}&end_date=${endDate}`,
+                {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            );
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.log('No autenticado con Microsoft Graph - mostrando solo sesiones locales');
+                    return [];
+                }
+                throw new Error(`Error fetching calendar events: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.events || [];
+        } catch (error) {
+            console.error('Error getting calendar events:', error);
+            return [];
+        }
+    },
+
+    async createCalendarEvent(eventData) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/calendar/events`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error creating calendar event: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error creating calendar event:', error);
+            throw error;
+        }
+    },
+
+    // ==============================
+    // Métodos de API - Teams
+    // ==============================
+
+    async createTeamsMeeting(subject, startTime, endTime) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/teams/meetings`, {
+                method: 'POST',
+                credentials: 'include', // Usar sesión del backend para autenticación
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject,
+                    start_time: startTime,
+                    end_time: endTime
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    console.warn('No autenticado con Microsoft Graph para crear reunión de Teams');
+                    return { joinUrl: generateTeamsChannelLink(), error: 'No autenticado' };
+                }
+                throw new Error(`Error creating Teams meeting: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error creating Teams meeting:', error);
+            return {
+                joinUrl: generateTeamsChannelLink(),
+                error: error.message
+            };
+        }
+    },
+
+    async getMeetingAttendance(meetingId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/teams/meetings/${meetingId}/attendance`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error getting meeting attendance: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error getting meeting attendance:', error);
+            return { attendees: [], error: error.message };
+        }
     }
 };

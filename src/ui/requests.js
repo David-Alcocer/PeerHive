@@ -190,9 +190,73 @@ export function renderRequests() {
 
 export async function assignRequestToAdvisor(requestId, advisorId) {
     try {
+        // Obtener la solicitud para obtener los datos necesarios
+        const req = appState.requests.find(r => r.id === requestId);
+        if (!req) {
+            throw new Error('Solicitud no encontrada');
+        }
+
+        // Asignar asesor y crear sesión local (operación principal — si falla, se propaga)
         await RequestService.assignAdvisor(requestId, advisorId);
 
-        showToast('Solicitud asignada, sesión agendada y chat creado', 'success');
+        // Obtener la sesión creada
+        const session = appState.sessions.find(s => s.requestId === requestId);
+
+        // Rastrear qué operaciones secundarias se completaron
+        let teamsCreated = false;
+        let calendarCreated = false;
+
+        // Crear reunión de Teams automáticamente (operación secundaria — no bloquea)
+        try {
+            const startTime = req.datetimeISO;
+            const endTime = new Date(new Date(req.datetimeISO).getTime() + 60 * 60 * 1000).toISOString();
+
+            const meetingResult = await RequestService.createTeamsMeeting(
+                `Asesoría: ${req.subject}`,
+                startTime,
+                endTime
+            );
+
+            if (meetingResult && meetingResult.joinUrl) {
+                teamsCreated = true;
+
+                // Actualizar la sesión con el link de Teams dinámico
+                if (session) {
+                    session.teamsLink = meetingResult.joinUrl;
+                    session.teamsMeetingId = meetingResult.id || null;
+                    appState.saveState();
+                }
+            }
+        } catch (teamsError) {
+            console.error('Error creando reunión de Teams:', teamsError);
+        }
+
+        // Crear evento en Outlook Calendar (operación secundaria — no bloquea)
+        try {
+            await RequestService.createCalendarEvent({
+                subject: `Asesoría: ${req.subject}`,
+                start_datetime: req.datetimeISO,
+                end_datetime: new Date(new Date(req.datetimeISO).getTime() + 60 * 60 * 1000).toISOString(),
+                body: `Tema: ${req.topic}\nNotas: ${req.notes || 'Sin notas'}`,
+                attendees: []
+            });
+            calendarCreated = true;
+        } catch (calendarError) {
+            console.error('Error creando evento de calendario:', calendarError);
+        }
+
+        // Mensaje de éxito que refleja qué operaciones se completaron realmente
+        const parts = ['Solicitud asignada y sesión agendada'];
+        if (teamsCreated) parts.push('reunión de Teams creada');
+        if (calendarCreated) parts.push('evento de calendario creado');
+        if (!teamsCreated || !calendarCreated) {
+            const failed = [];
+            if (!teamsCreated) failed.push('Teams');
+            if (!calendarCreated) failed.push('Calendario');
+            showToast(`${parts.join(', ')}. No se pudo integrar: ${failed.join(', ')}`, 'warning');
+        } else {
+            showToast(parts.join(', '), 'success');
+        }
 
         renderRequests();
         renderAdvisorPanel();
