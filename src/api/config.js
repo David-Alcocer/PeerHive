@@ -1,5 +1,7 @@
 
 export const API_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'http://localhost:8000/api';
+export const GRAPH_API_URL = 'https://graph.microsoft.com/v1.0';
 export const STORAGE_KEY = "peerhive_demo_state_v6";
 export const THEME_KEY = "peerhive_theme";
 
