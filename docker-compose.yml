@@ -10,12 +10,22 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - MONGO_URL=mongodb://mongo:27017
+      # MongoDB con autenticación
+      - MONGO_URL=mongodb://peerhive_user:${MONGO_PASSWORD}@mongo:27017
       - DB_NAME=peerhive
+      - MONGO_USERNAME=peerhive_user
+      # Azure AD
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - REDIRECT_URI=http://localhost:8000/auth/callback
+      # Seguridad
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - mongo
     networks:
       - peerhive_net
+    restart: unless-stopped
 
   frontend:
     build:
@@ -32,16 +42,24 @@ services:
       - backend
     networks:
       - peerhive_net
+    restart: unless-stopped
 
   mongo:
     image: mongo:latest
     container_name: peerhive_mongo
     ports:
       - "27017:27017"
+    environment:
+      # Habilitar autenticación en MongoDB
+      MONGO_INITDB_ROOT_USERNAME: peerhive_user
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: peerhive
     volumes:
       - mongo_data:/data/db
     networks:
       - peerhive_net
+    restart: unless-stopped
+    command: mongod --auth
 
 volumes:
   mongo_data:

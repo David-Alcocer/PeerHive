@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic_settings import BaseSettings
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 from urllib.parse import quote
 import os
@@ -11,14 +11,74 @@ import logging
 import base64
 import hashlib
 import msal
+from datetime import datetime, timedelta
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from fastapi.responses import JSONResponse
 
 # Configuration
 class Settings(BaseSettings):
     MONGO_URL: str = os.getenv("MONGO_URL", "mongodb://mongo:27017")
     DB_NAME: str = os.getenv("DB_NAME", "peerhive")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
+    # JWT Configuration
+    JWT_SECRET_KEY: str = os.getenv("SECRET_KEY", "jwt-secret-change-in-production")
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
 settings = Settings()
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# ── JWT Functions ──────────────────────────────────────────────
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    """Crea un token JWT de acceso."""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str):
+    """Decodifica un token JWT."""
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        return payload
+    except JWTError:
+        return None
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica una contraseña contra su hash."""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    """Genera el hash de una contraseña."""
+    return pwd_context.hash(password)
+
+# ── Pydantic Models for Authentication ───────────────────────────
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    role: str = "student"
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    email: Optional[EmailStr] = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -164,6 +224,22 @@ class TeamsMeetingCreate(BaseModel):
 # App Initialization
 app = FastAPI(title="PeerHive API", version="1.0.0")
 
+# Rate Limiter Configuration
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+
+def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    """Manejador personalizado para errores de rate limiting."""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "Demasiadas solicitudes. Por favor, intente más tarde.",
+            "retry_after": exc.detail
+        }
+    )
+
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
 # DBase Connection
 @app.on_event("startup")
 async def startup_db_client():
@@ -210,6 +286,7 @@ async def health():
 
 # Calendar API Routes
 @app.get("/api/calendar/events")
+@limiter.limit("30/minute")
 async def get_calendar_events(
     request: Request,
     start_date: Optional[str] = None,
@@ -243,6 +320,7 @@ async def get_calendar_events(
 
 
 @app.post("/api/calendar/events")
+@limiter.limit("20/minute")
 async def create_calendar_event(request: Request, event: CalendarEventCreate):
     """
     Crea un nuevo evento de asesoría en el calendario de Outlook.
@@ -473,6 +551,88 @@ async def get_attendance_report(request: Request, meeting_id: str, report_id: st
     except Exception as e:
         logger.error(f"Error fetching attendance report details: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching attendance report details: {str(e)}")
+
+
+# ── JWT Authentication Endpoints ───────────────────────────────
+@app.post("/api/auth/register", response_model=Token)
+@limiter.limit("5/minute")
+async def register(request: Request, user: UserCreate):
+    """
+    Registra un nuevo usuario en el sistema.
+    """
+    # Verificar si el usuario ya existe
+    user_data = await app.mongodb.users.find_one({"email": user.email})
+    if user_data:
+        raise HTTPException(status_code=400, detail="El correo ya está registrado")
+    
+    # Crear el usuario con contraseña hasheada
+    hashed_password = get_password_hash(user.password)
+    new_user = {
+        "name": user.name,
+        "email": user.email,
+        "password": hashed_password,
+        "role": user.role,
+        "subjects": [],
+        "isAdvisorApproved": user.role == "advisor",
+        "createdAt": datetime.utcnow().isoformat()
+    }
+    
+    result = await app.mongodb.users.insert_one(new_user)
+    
+    # Crear token JWT
+    access_token = create_access_token(data={"sub": user.email, "user_id": str(result.inserted_id)})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/api/auth/login", response_model=Token)
+@limiter.limit("10/minute")
+async def login(request: Request, user_login: UserLogin):
+    """
+    Autentica un usuario y retorna un token JWT.
+    """
+    # Buscar usuario en la base de datos
+    user_data = await app.mongodb.users.find_one({"email": user_login.email})
+    
+    if not user_data:
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    
+    # Verificar contraseña
+    if not verify_password(user_login.password, user_data.get("password", "")):
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    
+    # Crear token JWT
+    access_token = create_access_token(
+        data={"sub": user_login.email, "user_id": str(user_data.get("_id"))}
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/api/auth/me")
+async def get_current_user_info(authorization: str = Header(None)):
+    """
+    Obtiene la información del usuario actual basado en el token JWT.
+    """
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="No autorizado")
+    
+    token = authorization[7:]
+    payload = decode_access_token(token)
+    
+    if not payload:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    
+    email = payload.get("sub")
+    user_data = await app.mongodb.users.find_one({"email": email})
+    
+    if not user_data:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Retornar información del usuario sin la contraseña
+    user_data.pop("password", None)
+    user_data["id"] = str(user_data.pop("_id"))
+    
+    return user_data
 
 
 # Microsoft Graph Authentication Routes

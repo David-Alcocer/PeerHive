@@ -1,55 +1,144 @@
 
 import { appState, findUserByEmail, getCurrentUser } from '../store/state.js';
-import { hashPassword, verifyPassword, uid } from '../utils/helpers.js';
 import { API_URL } from '../api/config.js';
 
 export const AuthService = {
+    /**
+     * Autentica al usuario usando el backend JWT real.
+     */
     async login(email, password) {
-        // Simular latencia de red
-        await new Promise(resolve => setTimeout(resolve, 800));
+        try {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+                credentials: 'include'
+            });
 
-        const user = findUserByEmail(email);
-        if (!user || !verifyPassword(password, user.password)) {
-            throw new Error('Credenciales inválidas');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Credenciales inválidas');
+            }
+
+            const data = await response.json();
+
+            // Guardar el token JWT
+            localStorage.setItem('jwt_token', data.access_token);
+
+            // Obtener información del usuario
+            const userResponse = await fetch(`${API_URL}/api/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${data.access_token}`
+                },
+                credentials: 'include'
+            });
+
+            if (!userResponse.ok) {
+                throw new Error('Error al obtener información del usuario');
+            }
+
+            const userData = await userResponse.json();
+
+            // Guardar en el estado local
+            appState.currentUserId = userData.id;
+
+            // Actualizar el usuario en el estado local si existe
+            const existingUser = appState.users.find(u => u.email === email);
+            if (existingUser) {
+                existingUser.id = userData.id;
+            } else {
+                appState.users.push(userData);
+            }
+            appState.saveState();
+
+            return userData;
+        } catch (error) {
+            console.error('Error en login:', error);
+            throw error;
         }
-
-        if (user.role === 'advisor' && user.isAdvisorApproved === false) {
-            throw new Error('Tu cuenta de asesor está en revisión. Te notificaremos cuando sea aprobada.');
-        }
-
-        appState.currentUserId = user.id;
-        return user;
     },
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     */
     async signup(userData) {
-        // Simular latencia
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+            const response = await fetch(`${API_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+                credentials: 'include'
+            });
 
-        if (findUserByEmail(userData.email)) {
-            throw new Error('Ya existe un usuario con ese correo');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Error al registrar usuario');
+            }
+
+            const data = await response.json();
+
+            // Guardar el token JWT
+            localStorage.setItem('jwt_token', data.access_token);
+
+            // Obtener información del usuario
+            const userResponse = await fetch(`${API_URL}/api/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${data.access_token}`
+                },
+                credentials: 'include'
+            });
+
+            const newUserData = await userResponse.json();
+
+            // Agregar al estado local
+            appState.users.push(newUserData);
+            appState.currentUserId = newUserData.id;
+            appState.saveState();
+
+            return newUserData;
+        } catch (error) {
+            console.error('Error en signup:', error);
+            throw error;
         }
-
-        const newUser = {
-            id: uid('u'),
-            name: userData.name,
-            email: userData.email,
-            password: hashPassword(userData.password),
-            role: userData.role,
-            subjects: [],
-            advisorSubject: userData.advisorSubject || null,
-            advisorKardex: userData.advisorKardex || null,
-            isAdvisorApproved: userData.role === 'advisor' ? userData.isAdvisorApproved : false,
-            createdAt: new Date().toISOString()
-        };
-
-        appState.users.push(newUser);
-        appState.saveState();
-
-        return newUser;
     },
 
+    /**
+     * Cierra la sesión del usuario.
+     */
     logout() {
         appState.currentUserId = null;
+        localStorage.removeItem('jwt_token');
+    },
+
+    /**
+     * Obtiene el token JWT actual.
+     */
+    getToken() {
+        return localStorage.getItem('jwt_token');
+    },
+
+    /**
+     * Verifica si el usuario está autenticado.
+     */
+    async isAuthenticated() {
+        const token = this.getToken();
+        if (!token) return false;
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+            return response.ok;
+        } catch {
+            return false;
+        }
     },
 
     async processKardexFile(file) {
