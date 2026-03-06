@@ -1,11 +1,11 @@
-# 📚 PeerHive - Documentación del Proyecto
+#  PeerHive - Documentación del Proyecto
 
 > **Versión:** 1.0  
 > **Última actualización:** 2026-03-05
 
 ---
 
-## 📋 Índice de Documentos
+## Índice de Documentos
 
 | Documento | Descripción |
 |-----------|-------------|
@@ -19,7 +19,7 @@
 
 ---
 
-## 🏗️ Arquitectura del Proyecto
+## Arquitectura del Proyecto
 
 PeerHive implementa una **Arquitectura Hexagonal (Ports & Adapters)** con las siguientes capas:
 
@@ -35,15 +35,15 @@ src/
 
 El proyecto ha resuelto el **100% de los problemas críticos** de seguridad identificados:
 
-- ✅ Secrets hardcodeados
-- ✅ Credenciales en frontend
-- ✅ Base de datos en memoria
-- ✅ MongoDB sin autenticación
-- ✅ Auth simulada en frontend
+- Hecho -> Secrets hardcodeados
+- Hecho -> Credenciales en frontend
+- Hecho -> Base de datos en memoria
+- Hecho -> MongoDB sin autenticación
+- Hecho -> Auth simulada en frontend
 
 ---
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### Requisitos
 
@@ -66,7 +66,7 @@ pytest tests/ -v
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 PeerHive/
@@ -83,7 +83,7 @@ PeerHive/
 
 ---
 
-## 🔧 Tech Stack
+## Tech Stack
 
 | Componente | Tecnología |
 |------------|------------|
@@ -93,9 +93,3 @@ PeerHive/
 | Frontend | Vanilla JavaScript |
 | Testing | pytest |
 | CI/CD | GitHub Actions |
-
----
-
-## 📞 Soporte
-
-Para preguntas o contribuciones, favor de contactar al equipo de desarrollo.
