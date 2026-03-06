@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 1. [Resumen Ejecutivo](#resumen-ejecutivo)
 2. [Estado Actual del Proyecto](#estado-actual-del-proyecto)
@@ -218,9 +218,9 @@ El proyecto tiene **DOS aplicaciones FastAPI** que cumplen funciones similares:
 |----------------|--------|----------------|
 | Propósito | Frontend + Auth | API REST |
 | Puerto | 8000 | 8000 |
-| Autenticación OAuth | ✅ | ✅ |
-| Endpoints Graph | ❌ | ✅ |
-| CRUD de Usuarios | ❌ | ✅ (modelos) |
+| Autenticación OAuth | SI | SI |
+| Endpoints Graph | NO | SI |
+| CRUD de Usuarios | NO | SI (modelos) |
 
 **Impacto:** 
 - Duplicación de código
@@ -312,14 +312,14 @@ origins = [
 
 | Área SWEBOK | Estado | Observaciones |
 |-------------|--------|---------------|
-| **Ingeniería de Requisitos** | ✅ | `requirements.md` bien documentado con HUs y RNFs |
-| **Diseño de Software** | 🟡 Parcial | Usa servicios pero falta patrón unificado |
-| **Construcción de Software** | ✅ | Docker + virtual environments |
-| **Pruebas de Software** | ❌ | Sin tests unitarios ni integración |
-| **Mantenimiento** | 🟡 Parcial | Sin versionado semántico |
-| **Gestión de Proyectos** | ❌ | Sin metodología definida |
-| **Calidad de Software** | ❌ | Sin métricas ni code coverage |
-| **Ingeniería de Seguridad** | 🟡 Parcial | OAuth implementado, pero sin threat modeling |
+| **Ingeniería de Requisitos** | SI | `requirements.md` bien documentado con HUs y RNFs |
+| **Diseño de Software** | Parcial | Usa servicios pero falta patrón unificado |
+| **Construcción de Software** | SI | Docker + virtual environments |
+| **Pruebas de Software** | NO | Sin tests unitarios ni integración |
+| **Mantenimiento** | Parcial | Sin versionado semántico |
+| **Gestión de Proyectos** | NO | Sin metodología definida |
+| **Calidad de Software** | NO | Sin métricas ni code coverage |
+| **Ingeniería de Seguridad** | Parcial | OAuth implementado, pero sin threat modeling |
 
 ### 4.2 Gap Analysis
 
@@ -388,7 +388,7 @@ peerhive/
 │   ├── main.py                 # Entry point
 │   ├── config.py               # Configuración centralizada
 │   │
-│   ├── domain/                 # ✨ DOMINIO (Core)
+│   ├── domain/                 # - DOMINIO (Core)
 │   │   ├── __init__.py
 │   │   ├── entities/           # Entidades del negocio
 │   │   │   ├── user.py
@@ -403,7 +403,7 @@ peerhive/
 │   │       ├── base.py
 │   │       └── validation.py
 │   │
-│   ├── application/            # ✨ CASOS DE USO
+│   ├── application/            # - CASOS DE USO
 │   │   ├── __init__.py
 │   │   ├── ports/              # Interfaces/Contracts
 │   │   │   ├── input/          # Interfaces de entrada
@@ -424,7 +424,7 @@ peerhive/
 │   │           ├── create_request.py
 │   │           └── assign_advisor.py
 │   │
-│   ├── infrastructure/         # ✨ ADAPTERS
+│   ├── infrastructure/         # - ADAPTERS
 │   │   ├── __init__.py
 │   │   ├── database/
 │   │   │   ├── mongo_client.py
@@ -439,7 +439,7 @@ peerhive/
 │   │   └── notifications/
 │   │       └── email_adapter.py
 │   │
-│   └── api/                    # ✨ ADAPTER: REST
+│   └── api/                    # - ADAPTER: REST
 │       ├── __init__.py
 │       ├── dependencies.py      # FastAPI dependencies
 │       ├── middleware/
@@ -453,7 +453,7 @@ peerhive/
 │           ├── sessions.py
 │           └── chat.py
 │
-├── tests/                       # ✨ PRUEBAS
+├── tests/                       # - PRUEBAS
 │   ├── __init__.py
 │   ├── unit/
 │   │   ├── domain/
@@ -504,7 +504,7 @@ peerhive/
 
 ## 6. Plan de Migración
 
-### Fase 1: Estabilización (Semanas 1-2)
+### Fase 1: Estabilización (Ahora)
 
 ```
 ✓ CORRECCIONES CRÍTICAS:
@@ -515,7 +515,7 @@ peerhive/
 └── 1.5 Implementar auth real con JWT
 ```
 
-### Fase 2: Refactorización (Semanas 3-6)
+### Fase 2: Refactorización (Ahora)
 
 ```
 ✓ ARQUITECTURA:
@@ -525,7 +525,7 @@ peerhive/
 └── 2.4 Unificar endpoints en backend/app/
 ```
 
-### Fase 3: Calidad (Semanas 7-8)
+### Fase 3: Calidad (Fecha pendiente)
 
 ```
 ✓ MEJORAS:
@@ -536,10 +536,10 @@ peerhive/
 └── 3.5 Documentar API con colección Postman
 ```
 
-### Fase 4: Enhancements (Semanas 9+)
+### Fase 4: Enhancements (Fecha pendiente)
 
 ```
-✓ OPCIONALES:
+✓ Pendientes:
 ├── 4.1 Implementar WebSocket real para chat
 ├── 4.2 Añadir sistema de notificaciones
 ├── 4.3 Implementar cache con Redis
@@ -551,7 +551,7 @@ peerhive/
 ## 7. Roadmap de Implementación
 
 ```
-2026-03                    2026-04                    2026-05
+2026-03                    2026-03                    2026-03
     │                          │                          │
 ┌───┴───┐                  ┌───┴───┐                  ┌───┴───┐
 │ FASE 1│                  │ FASE 2│                  │ FASE 3│
@@ -573,9 +573,9 @@ peerhive/
 
 PeerHive es un proyecto con **buenos fundamentos** pero con **problemas críticos** que impiden su uso en producción:
 
-1. ⚠️ **Seguridad comprometida**: Credenciales visibles, secrets hardcodeados
-2. ⚠️ **Arquitectura confusa**: Dos aplicaciones FastAPI duplicadas
-3. ⚠️ **Calidad insuficiente**: Sin tests, sin linting, sin CI/CD
+1. **Seguridad comprometida**: Credenciales visibles, secrets hardcodeados
+2. **Arquitectura confusa**: Dos aplicaciones FastAPI duplicadas
+3. **Calidad insuficiente**: Sin tests, sin linting, sin CI/CD
 
 ### Próximos Pasos
 
