@@ -16,6 +16,8 @@
 | [`CHANGELOG_MS_GRAPH.md`](CHANGELOG_MS_GRAPH.md) | Historial de cambios de MS Graph |
 | [`CRUD_Admin.md`](CRUD_Admin.md) | Documentación de operaciones CRUD para admin |
 | [`Match_CRUDs.md`](Match_CRUDs.md) | Mapeo de operaciones CRUD |
+| [`DISTRIBUCION_TRABAJO_BACKEND.md`](DISTRIBUCION_TRABAJO_BACKEND.md) | Distribución de trabajo del equipo backend |
+| [`DISTRIBUCION_TRABAJO_FRONTEND.md`](DISTRIBUCION_TRABAJO_FRONTEND.md) | Distribución de trabajo del equipo frontend (gaps identificados) |
 
 ---
 

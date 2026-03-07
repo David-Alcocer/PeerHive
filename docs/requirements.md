@@ -58,15 +58,14 @@ Este documento define las **Historias de Usuario (HU)** y los **Requisitos No Fu
 
 ---
 
-# 📌 Cambios Clave Respecto a la Versión Anterior
+# Cambios Clave Respecto a la Versión Anterior
 
-- ❌ Eliminado: Kardex en PDF.
-- ✅ Nuevo método de validación: **Captura de pantalla del semestre equivalente**.
-- 🔐 Refuerzo en autenticación con Microsoft Entra ID.
-- 💬 Chat implementado con WebSockets autenticados.
-- 🎫 Control estricto de estados de tickets.
-- 📡 Integración formal con Microsoft Graph para Teams.
-
+- Eliminado: Kardex en PDF.
+- Nuevo método de validación: **Captura de pantalla del semestre equivalente**.
+- Refuerzo en autenticación con Microsoft Entra ID.
+- Chat implementado con WebSockets autenticados.
+- Control estricto de estados de tickets.
+- Integración formal con Microsoft Graph para Teams.
 ---
 
 Este documento refleja la arquitectura y reglas reales implementadas en el **Backend actual de PeerHive**.
