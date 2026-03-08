@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+motor
+pydantic
+passlib[bcrypt]
+python-dotenv
+
+# testing
+pytest
+httpx
