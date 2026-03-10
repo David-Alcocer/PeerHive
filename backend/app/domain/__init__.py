@@ -4,6 +4,7 @@ Capa de Dominio de PeerHive.
 Contiene las entidades del negocio y los puertos (interfaces)
 que definen los contratos para la infraestructura.
 """
+
 from .entities import (
     User,
     Request,
@@ -18,7 +19,7 @@ from .entities import (
     RequestStatusEnum,
     MeetingPlatformEnum,
     SessionStatusEnum,
-    EvidenceTypeEnum
+    EvidenceTypeEnum,
 )
 
 from .repositories import (
@@ -26,7 +27,7 @@ from .repositories import (
     RequestRepositoryPort,
     SessionRepositoryPort,
     SubjectRepositoryPort,
-    ChatRepositoryPort
+    ChatRepositoryPort,
 )
 
 __all__ = [
@@ -50,5 +51,5 @@ __all__ = [
     "RequestRepositoryPort",
     "SessionRepositoryPort",
     "SubjectRepositoryPort",
-    "ChatRepositoryPort"
+    "ChatRepositoryPort",
 ]

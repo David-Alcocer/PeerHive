@@ -32,44 +32,6 @@ class TestRateLimiting:
 
 class TestAuthModels:
     """Tests for authentication models."""
-Trajectory ID: 5a2d6d94-ac4c-4586-9fe9-364f0786bae9
-Error: agent executor error: request failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse": read tcp 10.4.62.255:41504->142.250.115.95:443: read: connection reset by peer: request failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse": read tcp 10.4.62.255:41504 -> 142.250.115.95:443: read: connection reset by peer
-(1) attached stack trace
-  -- stack trace:
-  | google3/third_party/jetski/cortex/cortex.(*CascadeManager).executeHelper.func1
-  | 	third_party/jetski/cortex/cascade_manager.go:1945
-  | [...repeated from below...]
-Wraps: (2) agent executor error
-Wraps: (3) tags: map[stream_receive_count:0 streaming_duration:0s]
-Wraps: (4) attached stack trace
-  -- stack trace:
-  | google3/third_party/gemini_coder/framework/generator/generator.(*streamResponseHandler).processStream
-  | 	third_party/gemini_coder/framework/generator/stream_handler.go:352
-  | google3/third_party/gemini_coder/framework/generator/generator.(*PlannerGenerator).attemptGenerate
-  | 	third_party/gemini_coder/framework/generator/planner_generator.go:457
-  | google3/third_party/gemini_coder/framework/generator/generator.(*PlannerGenerator).generateWithAPIRetry
-  | 	third_party/gemini_coder/framework/generator/planner_generator.go:291
-  | google3/third_party/gemini_coder/framework/generator/generator.(*PlannerGenerator).generateWithModelOutputRetry
-  | 	third_party/gemini_coder/framework/generator/planner_generator.go:159
-  | google3/third_party/gemini_coder/framework/generator/generator.(*PlannerGenerator).Generate
-  | 	third_party/gemini_coder/framework/generator/planner_generator.go:97
-  | google3/third_party/gemini_coder/framework/executor/executor.(*Executor).executeLoop
-  | 	third_party/gemini_coder/framework/executor/executor.go:356
-  | google3/third_party/gemini_coder/framework/executor/executor.(*Executor).Execute
-  | 	third_party/gemini_coder/framework/executor/executor.go:278
-  | google3/third_party/jetski/cortex/cortex.(*CascadeManager).executeHelper.func1
-  | 	third_party/jetski/cortex/cascade_manager.go:1897
-  | google3/third_party/jetski/cortex/cortex.(*CascadeManager).executeHelper.func2
-  | 	third_party/jetski/cortex/cascade_manager.go:1990
-  | runtime.goexit
-  | 	third_party/go/gc/src/runtime/asm_amd64.s:1774
-Wraps: (5) request failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse": read tcp 10.4.62.255:41504->142.250.115.95:443: read: connection reset by peer
-Wraps: (6) request failed
-Wraps: (7) Post "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse"
-Wraps: (8) read tcp 10.4.62.255:41504 -> 142.250.115.95:443
-Wraps: (9) read
-Wraps: (10) connection reset by peer
-Error types: (1) *withstack.withStack (2) *errutil.withPrefix (3) *go_utils.withTags (4) *withstack.withStack (5) *errutil.withPrefix (6) *fmt.wrapError (7) *url.Error (8) *net.OpError (9) *os.SyscallError (10) syscall.Errno
     def test_user_login_model(self):
         """Test UserLogin Pydantic model."""
         try:

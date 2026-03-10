@@ -19,20 +19,25 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 
+
 # Configuration
 class Settings(BaseSettings):
     MONGO_URL: str = os.getenv("MONGO_URL", "mongodb://mongo:27017")
     DB_NAME: str = os.getenv("DB_NAME", "peerhive")
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
+    SECRET_KEY: str = os.getenv(
+        "SECRET_KEY", "your-secret-key-here-change-in-production"
+    )
     # JWT Configuration
     JWT_SECRET_KEY: str = os.getenv("SECRET_KEY", "jwt-secret-change-in-production")
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+
 settings = Settings()
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # ── JWT Functions ──────────────────────────────────────────────
 def create_access_token(data: dict, expires_delta: timedelta = None):
@@ -41,31 +46,42 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.utcnow() + timedelta(
+            minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+        )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
     return encoded_jwt
+
 
 def decode_access_token(token: str):
     """Decodifica un token JWT."""
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        payload = jwt.decode(
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+        )
         return payload
     except JWTError:
         return None
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica una contraseña contra su hash."""
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password: str) -> str:
     """Genera el hash de una contraseña."""
     return pwd_context.hash(password)
+
 
 # ── Pydantic Models for Authentication ───────────────────────────
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
 
 class UserCreate(BaseModel):
     name: str
@@ -73,12 +89,15 @@ class UserCreate(BaseModel):
     password: str
     role: str = "student"
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     email: Optional[EmailStr] = None
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -96,6 +115,7 @@ _TOKEN_ENCRYPTION_KEY = base64.urlsafe_b64encode(
 
 # Instancia singleton de Fernet para evitar reconstruirla en cada llamada
 from cryptography.fernet import Fernet as _Fernet
+
 _fernet = _Fernet(_TOKEN_ENCRYPTION_KEY)
 
 
@@ -162,7 +182,9 @@ def get_access_token(request: Request) -> Optional[str]:
 
     # Fallback: verificar en la sesión
     encrypted_token = request.session.get("ms_graph_token")
-    logger.info(f"Buscando token en sesión: {'encontrado' if encrypted_token else 'no encontrado'}")
+    logger.info(
+        f"Buscando token en sesión: {'encontrado' if encrypted_token else 'no encontrado'}"
+    )
     if encrypted_token:
         return _decrypt_token(encrypted_token)
 
@@ -172,20 +194,21 @@ def get_access_token(request: Request) -> Optional[str]:
 def validate_token(token: str) -> bool:
     """
     Valida que el token no esté vacío y tenga un formato básico válido.
-    
+
     Nota: Para validación completa de expiración, decodificar el JWT.
     """
     if not token or not isinstance(token, str):
         return False
-    
+
     # Verificar longitud mínima (tokens de acceso típicos tienen al menos 20 caracteres)
     if len(token) < 20:
         logger.warning(f"Token demasiado corto: {len(token)} caracteres")
         return False
-    
+
     # Los tokens JWT tienen 3 partes separadas por puntos
     # Esta es una validación básica, no exhaustiva
     return True
+
 
 # Pydantic Models for Calendar API
 class CalendarEventCreate(BaseModel):
@@ -221,6 +244,7 @@ class TeamsMeetingCreate(BaseModel):
     end_time: str
     participants: Optional[List[Dict[str, str]]] = None
 
+
 # App Initialization
 app = FastAPI(title="PeerHive API", version="1.0.0")
 
@@ -228,17 +252,20 @@ app = FastAPI(title="PeerHive API", version="1.0.0")
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
+
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     """Manejador personalizado para errores de rate limiting."""
     return JSONResponse(
         status_code=429,
         content={
             "detail": "Demasiadas solicitudes. Por favor, intente más tarde.",
-            "retry_after": exc.detail
-        }
+            "retry_after": exc.detail,
+        },
     )
 
+
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
 
 # DBase Connection
 @app.on_event("startup")
@@ -247,10 +274,12 @@ async def startup_db_client():
     app.mongodb = app.mongodb_client[settings.DB_NAME]
     print(f"Connected to MongoDB at {settings.MONGO_URL}")
 
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     app.mongodb_client.close()
     print("MongoDB connection closed")
+
 
 # CORS
 origins = [
@@ -271,13 +300,15 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=settings.SECRET_KEY,
     session_cookie="session",
-    max_age=3600  # 1 hour
+    max_age=3600,  # 1 hour
 )
+
 
 # Routes
 @app.get("/")
 async def root():
     return {"message": "Welcome to PeerHive API"}
+
 
 @app.get("/health")
 async def health():
@@ -288,35 +319,34 @@ async def health():
 @app.get("/api/calendar/events")
 @limiter.limit("30/minute")
 async def get_calendar_events(
-    request: Request,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None
+    request: Request, start_date: Optional[str] = None, end_date: Optional[str] = None
 ):
     """
     Obtiene eventos del calendario de Outlook.
-    
+
     Requiere que el usuario esté autenticado con Microsoft Graph.
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.calendar import get_calendar_events
+
         events = get_calendar_events(
-            access_token=access_token,
-            start_date=start_date,
-            end_date=end_date
+            access_token=access_token, start_date=start_date, end_date=end_date
         )
         return {"events": events, "count": len(events)}
     except Exception as e:
         logger.error(f"Error fetching calendar events: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching calendar events: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching calendar events: {str(e)}"
+        )
 
 
 @app.post("/api/calendar/events")
@@ -324,20 +354,21 @@ async def get_calendar_events(
 async def create_calendar_event(request: Request, event: CalendarEventCreate):
     """
     Crea un nuevo evento de asesoría en el calendario de Outlook.
-    
+
     Requiere que el usuario esté autenticado con Microsoft Graph.
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.calendar import create_calendar_event
+
         new_event = create_calendar_event(
             access_token=access_token,
             subject=event.subject,
@@ -347,12 +378,14 @@ async def create_calendar_event(request: Request, event: CalendarEventCreate):
             location=event.location,
             attendees=event.attendees,
             is_online_meeting=event.is_online_meeting,
-            online_meeting_provider=event.online_meeting_provider
+            online_meeting_provider=event.online_meeting_provider,
         )
         return {"event": new_event, "message": "Evento creado exitosamente"}
     except Exception as e:
         logger.error(f"Error creating calendar event: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error creating calendar event: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating calendar event: {str(e)}"
+        )
 
 
 @app.get("/api/calendar/events/{event_id}")
@@ -362,38 +395,44 @@ async def get_calendar_event(request: Request, event_id: str):
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.calendar import get_event_by_id
+
         event = get_event_by_id(access_token=access_token, event_id=event_id)
         return {"event": event}
     except Exception as e:
         logger.error(f"Error fetching calendar event: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching calendar event: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching calendar event: {str(e)}"
+        )
 
 
 @app.put("/api/calendar/events/{event_id}")
-async def update_calendar_event(request: Request, event_id: str, event: CalendarEventUpdate):
+async def update_calendar_event(
+    request: Request, event_id: str, event: CalendarEventUpdate
+):
     """
     Actualiza un evento existente en el calendario de Outlook.
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.calendar import update_calendar_event
+
         updated_event = update_calendar_event(
             access_token=access_token,
             event_id=event_id,
@@ -403,12 +442,14 @@ async def update_calendar_event(request: Request, event_id: str, event: Calendar
             end_datetime=event.end_datetime,
             location=event.location,
             attendees=event.attendees,
-            is_online_meeting=event.is_online_meeting
+            is_online_meeting=event.is_online_meeting,
         )
         return {"event": updated_event, "message": "Evento actualizado exitosamente"}
     except Exception as e:
         logger.error(f"Error updating calendar event: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error updating calendar event: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error updating calendar event: {str(e)}"
+        )
 
 
 @app.delete("/api/calendar/events/{event_id}")
@@ -418,20 +459,23 @@ async def delete_calendar_event(request: Request, event_id: str):
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.calendar import delete_calendar_event
+
         delete_calendar_event(access_token=access_token, event_id=event_id)
         return {"message": "Evento eliminado exitosamente"}
     except Exception as e:
         logger.error(f"Error deleting calendar event: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error deleting calendar event: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error deleting calendar event: {str(e)}"
+        )
 
 
 # Teams API Routes
@@ -439,31 +483,37 @@ async def delete_calendar_event(request: Request, event_id: str):
 async def create_teams_meeting(request: Request, meeting: TeamsMeetingCreate):
     """
     Crea una reunión de Microsoft Teams.
-    
+
     Requiere que el usuario esté autenticado con Microsoft Graph.
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.teams import create_teams_meeting
+
         new_meeting = create_teams_meeting(
             access_token=access_token,
             subject=meeting.subject,
             start_time=meeting.start_time,
             end_time=meeting.end_time,
-            participants=meeting.participants
+            participants=meeting.participants,
         )
-        return {"meeting": new_meeting, "message": "Reunión de Teams creada exitosamente"}
+        return {
+            "meeting": new_meeting,
+            "message": "Reunión de Teams creada exitosamente",
+        }
     except Exception as e:
         logger.error(f"Error creating Teams meeting: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error creating Teams meeting: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating Teams meeting: {str(e)}"
+        )
 
 
 @app.get("/api/teams/meetings/{meeting_id}")
@@ -473,20 +523,23 @@ async def get_teams_meeting(request: Request, meeting_id: str):
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.teams import get_meeting
+
         meeting = get_meeting(access_token=access_token, meeting_id=meeting_id)
         return {"meeting": meeting}
     except Exception as e:
         logger.error(f"Error fetching Teams meeting: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching Teams meeting: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching Teams meeting: {str(e)}"
+        )
 
 
 @app.get("/api/teams/meetings/{meeting_id}/attendance")
@@ -496,34 +549,45 @@ async def get_meeting_attendance(request: Request, meeting_id: str):
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.teams import get_meeting_attendance_report
-        reports = get_meeting_attendance_report(access_token=access_token, meeting_id=meeting_id)
-        
+
+        reports = get_meeting_attendance_report(
+            access_token=access_token, meeting_id=meeting_id
+        )
+
         # Si hay reportes, obtener los detalles del primero
         if reports:
             first_report = reports[0]
             report_id = first_report.get("report_id")
             if report_id:
                 from .services.teams import get_attendance_report_details
+
                 details = get_attendance_report_details(
-                    access_token=access_token, 
-                    meeting_id=meeting_id, 
-                    report_id=report_id
+                    access_token=access_token,
+                    meeting_id=meeting_id,
+                    report_id=report_id,
                 )
                 return {"attendance": details}
-        
-        return {"attendance": {"reports": reports, "message": "No hay reportes de asistencia disponibles"}}
+
+        return {
+            "attendance": {
+                "reports": reports,
+                "message": "No hay reportes de asistencia disponibles",
+            }
+        }
     except Exception as e:
         logger.error(f"Error fetching attendance report: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching attendance report: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error fetching attendance report: {str(e)}"
+        )
 
 
 @app.get("/api/teams/meetings/{meeting_id}/attendance/{report_id}")
@@ -533,24 +597,26 @@ async def get_attendance_report(request: Request, meeting_id: str, report_id: st
     """
     # Obtener el token de acceso del header Authorization o sesión
     access_token = get_access_token(request)
-    
+
     if not access_token:
         raise HTTPException(
             status_code=401,
-            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero."
+            detail="No autenticado con Microsoft Graph. Por favor, inicia sesión primero.",
         )
-    
+
     try:
         from .services.teams import get_attendance_report_details
+
         report = get_attendance_report_details(
-            access_token=access_token, 
-            meeting_id=meeting_id, 
-            report_id=report_id
+            access_token=access_token, meeting_id=meeting_id, report_id=report_id
         )
         return {"report": report}
     except Exception as e:
         logger.error(f"Error fetching attendance report details: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching attendance report details: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching attendance report details: {str(e)}",
+        )
 
 
 # ── JWT Authentication Endpoints ───────────────────────────────
@@ -564,7 +630,7 @@ async def register(request: Request, user: UserCreate):
     user_data = await app.mongodb.users.find_one({"email": user.email})
     if user_data:
         raise HTTPException(status_code=400, detail="El correo ya está registrado")
-    
+
     # Crear el usuario con contraseña hasheada
     hashed_password = get_password_hash(user.password)
     new_user = {
@@ -574,13 +640,15 @@ async def register(request: Request, user: UserCreate):
         "role": user.role,
         "subjects": [],
         "isAdvisorApproved": user.role == "advisor",
-        "createdAt": datetime.utcnow().isoformat()
+        "createdAt": datetime.utcnow().isoformat(),
     }
-    
+
     result = await app.mongodb.users.insert_one(new_user)
-    
+
     # Crear token JWT
-    access_token = create_access_token(data={"sub": user.email, "user_id": str(result.inserted_id)})
+    access_token = create_access_token(
+        data={"sub": user.email, "user_id": str(result.inserted_id)}
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -592,19 +660,19 @@ async def login(request: Request, user_login: UserLogin):
     """
     # Buscar usuario en la base de datos
     user_data = await app.mongodb.users.find_one({"email": user_login.email})
-    
+
     if not user_data:
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
-    
+
     # Verificar contraseña
     if not verify_password(user_login.password, user_data.get("password", "")):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
-    
+
     # Crear token JWT
     access_token = create_access_token(
         data={"sub": user_login.email, "user_id": str(user_data.get("_id"))}
     )
-    
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -615,23 +683,23 @@ async def get_current_user_info(authorization: str = Header(None)):
     """
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="No autorizado")
-    
+
     token = authorization[7:]
     payload = decode_access_token(token)
-    
+
     if not payload:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
-    
+
     email = payload.get("sub")
     user_data = await app.mongodb.users.find_one({"email": email})
-    
+
     if not user_data:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
+
     # Retornar información del usuario sin la contraseña
     user_data.pop("password", None)
     user_data["id"] = str(user_data.pop("_id"))
-    
+
     return user_data
 
 
@@ -642,7 +710,12 @@ AZURE_CLIENT_ID = os.getenv("AZURE_CLIENT_ID", "")
 AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET", "")
 AUTHORITY = "https://login.microsoftonline.com/common"
 REDIRECT_URI = os.getenv("REDIRECT_URI", "http://localhost:8000/auth/callback")
-SCOPES = ["User.Read", "Calendars.ReadWrite", "OnlineMeetings.ReadWrite", "OnlineMeetingArtifact.Read.All"]
+SCOPES = [
+    "User.Read",
+    "Calendars.ReadWrite",
+    "OnlineMeetings.ReadWrite",
+    "OnlineMeetingArtifact.Read.All",
+]
 
 
 def build_msal_app():
@@ -660,14 +733,14 @@ async def login(request: Request):
     Inicia el flujo de autenticación con Microsoft Graph.
     """
     request.session.clear()
-    
+
     msal_app = build_msal_app()
     flow = msal_app.initiate_auth_code_flow(
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI,
         prompt="login",
     )
-    
+
     request.session["auth_flow"] = flow
     return {"auth_uri": flow["auth_uri"]}
 
@@ -679,17 +752,23 @@ async def callback(request: Request):
     """
     flow = request.session.get("auth_flow")
     if not flow:
-        raise HTTPException(status_code=400, detail="No auth flow. Ve a /auth/login otra vez.")
-    
+        raise HTTPException(
+            status_code=400, detail="No auth flow. Ve a /auth/login otra vez."
+        )
+
     msal_app = build_msal_app()
     try:
-        result = msal_app.acquire_token_by_auth_code_flow(flow, dict(request.query_params))
+        result = msal_app.acquire_token_by_auth_code_flow(
+            flow, dict(request.query_params)
+        )
     except ValueError:
         raise HTTPException(status_code=400, detail="State/CSRF validation failed.")
-    
+
     if "error" in result:
-        raise HTTPException(status_code=400, detail=result.get("error_description", result["error"]))
-    
+        raise HTTPException(
+            status_code=400, detail=result.get("error_description", result["error"])
+        )
+
     claims = result.get("id_token_claims") or {}
     request.session["user"] = {
         "name": claims.get("name"),
@@ -702,7 +781,7 @@ async def callback(request: Request):
     if access_token:
         request.session["ms_graph_token"] = _encrypt_token(access_token)
         logger.info("Token de Microsoft Graph almacenado en sesión (cifrado)")
-    
+
     return {"message": "Autenticación exitosa", "user": request.session["user"]}
 
 
@@ -712,13 +791,13 @@ async def logout(request: Request):
     Cierra la sesión del usuario.
     """
     request.session.clear()
-    
+
     post_logout_redirect = "http://localhost:8000/"
     microsoft_logout = (
         "https://login.microsoftonline.com/common/oauth2/v2.0/logout"
         f"?post_logout_redirect_uri={quote(post_logout_redirect)}"
     )
-    
+
     return {"logout_uri": microsoft_logout}
 
 
@@ -729,9 +808,5 @@ async def get_current_user(request: Request):
     """
     user = request.session.get("user")
     has_token = bool(request.session.get("ms_graph_token"))
-    
-    return {
-        "user": user,
-        "authenticated": bool(user),
-        "has_graph_token": has_token
-    }
+
+    return {"user": user, "authenticated": bool(user), "has_graph_token": has_token}
