@@ -6,7 +6,7 @@ Sincronización de eventos del calendario con Outlook Calendar
 import requests
 import logging
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

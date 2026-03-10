@@ -4,7 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from urllib.parse import quote
 import os
 import logging
@@ -18,6 +18,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
+from cryptography.fernet import Fernet as _Fernet
 
 
 # Configuration
@@ -114,7 +115,6 @@ _TOKEN_ENCRYPTION_KEY = base64.urlsafe_b64encode(
 )
 
 # Instancia singleton de Fernet para evitar reconstruirla en cada llamada
-from cryptography.fernet import Fernet as _Fernet
 
 _fernet = _Fernet(_TOKEN_ENCRYPTION_KEY)
 
@@ -728,7 +728,7 @@ def build_msal_app():
 
 
 @app.get("/auth/login")
-async def login(request: Request):
+async def ms_login(request: Request):
     """
     Inicia el flujo de autenticación con Microsoft Graph.
     """

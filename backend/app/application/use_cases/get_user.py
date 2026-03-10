@@ -18,6 +18,18 @@ class GetUserUseCase:
     def __init__(self, user_repository: UserRepositoryPort):
         self.user_repository = user_repository
 
+    async def execute(self, user_id: str) -> Optional[User]:
+        """
+        Obtiene un usuario por su ID.
+
+        Args:
+            user_id: ID del usuario
+
+        Returns:
+            El usuario si existe, None en caso contrario
+        """
+        return await self.user_repository.get_by_id(user_id)
+
     async def execute_by_id(self, user_id: str) -> Optional[User]:
         """
         Obtiene un usuario por su ID.

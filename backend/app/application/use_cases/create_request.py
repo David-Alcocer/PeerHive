@@ -19,7 +19,7 @@ class CreateRequestUseCase:
         self.request_repository = request_repository
 
     async def execute(
-        self, student_id: str, subject: str, topic: str, description: str = None
+        self, student_id: str, subject: str, topic: str = None, description: str = None
     ) -> Request:
         """
         Ejecuta el caso de uso para crear una solicitud.

@@ -4,9 +4,7 @@ Caso de uso: Asignar Solicitud.
 Asigna una solicitud de asesoría a un asesor.
 """
 
-from typing import Optional
-
-from ...domain.entities import Request, RequestStatusEnum
+from ...domain.entities import Request
 from ...domain.repositories import RequestRepositoryPort
 
 
@@ -38,12 +36,17 @@ class AssignRequestUseCase:
             raise ValueError("La solicitud no existe")
 
         # Verificar que la solicitud está pendiente
-        if not request.is_pending():
-            raise ValueError("La solicitud ya ha sido asignada")
+        # Soporta tanto entidades Request (con .is_pending()) como dicts
+        if isinstance(request, dict):
+            if request.get("status") != "pending":
+                raise ValueError("Request already assigned")
+        else:
+            if not request.is_pending():
+                raise ValueError("Request already assigned")
 
         # Asignar la solicitud al asesor
-        updated_request = await self.request_repository.assign_to_advisor(
-            request_id=request_id, advisor_id=advisor_id
+        updated_request = await self.request_repository.update(
+            request_id, {"status": "assigned", "advisor_id": advisor_id}
         )
 
         return updated_request

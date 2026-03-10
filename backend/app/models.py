@@ -3,7 +3,6 @@ from typing import Optional, List, Any, Dict
 from datetime import datetime
 from enum import Enum
 from bson import ObjectId
-from typing_extensions import Annotated
 
 
 # Helper functions for ObjectId handling

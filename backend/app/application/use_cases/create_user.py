@@ -23,7 +23,7 @@ class CreateUserUseCase:
         self,
         name: str,
         email: str,
-        password_hash: str,
+        password: str,
         role: str = "student",
         microsoft_id: str = "",
         advisor_subjects: Optional[list] = None,
@@ -34,7 +34,7 @@ class CreateUserUseCase:
         Args:
             name: Nombre del usuario
             email: Correo electrónico del usuario
-            password_hash: Hash de la contraseña
+            password: Contraseña del usuario (se hashea internamente)
             role: Rol del usuario (student, advisor, admin)
             microsoft_id: ID de Microsoft (opcional)
             advisor_subjects: Lista de materias que puede enseñar (solo para asesores)
@@ -48,7 +48,13 @@ class CreateUserUseCase:
         # Verificar si el usuario ya existe
         existing_user = await self.user_repository.get_by_email(email)
         if existing_user:
-            raise ValueError("El correo ya está registrado")
+            raise ValueError("Email already registered")
+
+        # Hash de la contraseña (truncar a 72 bytes - límite de bcrypt)
+        from passlib.context import CryptContext
+
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        password_hash = pwd_context.hash(password[:72])
 
         # Crear la entidad de dominio
         user = User(
