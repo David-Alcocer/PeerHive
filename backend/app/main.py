@@ -70,12 +70,12 @@ def decode_access_token(token: str):
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifica una contraseña contra su hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return pwd_context.verify(plain_password[:72], hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Genera el hash de una contraseña."""
-    return pwd_context.hash(password)
+    return pwd_context.hash(password[:72])
 
 
 # ── Pydantic Models for Authentication ───────────────────────────
