@@ -87,7 +87,6 @@ _container: Container = None
 
 def get_container() -> Container:
     """Obtiene la instancia global del contenedor."""
-    global _container
     return _container
 
 

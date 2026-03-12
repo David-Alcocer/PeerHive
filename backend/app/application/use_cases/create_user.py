@@ -54,7 +54,8 @@ class CreateUserUseCase:
         from passlib.context import CryptContext
 
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        password_hash = pwd_context.hash(password[:72])
+        truncated_password = password[:72]
+        password_hash = pwd_context.hash(truncated_password)
 
         # Crear la entidad de dominio
         user = User(

@@ -69,13 +69,17 @@ def decode_access_token(token: str):
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifica una contraseña contra su hash."""
-    return pwd_context.verify(plain_password[:72], hashed_password)
+    """Verify a password against its hash, truncating to 72 bytes."""
+    # Bcrypt has a 72-byte limit
+    truncated_password = plain_password[:72]
+    return pwd_context.verify(truncated_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Genera el hash de una contraseña."""
-    return pwd_context.hash(password[:72])
+    """Hash a password, truncating to 72 bytes for bcrypt compatibility."""
+    # Bcrypt has a 72-byte limit
+    truncated_password = password[:72]
+    return pwd_context.hash(truncated_password)
 
 
 # ── Pydantic Models for Authentication ───────────────────────────
