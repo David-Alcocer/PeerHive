@@ -1,130 +1,180 @@
-# 🐝 PeerHive
+# PeerHive – Plataforma de Asesorías Académicas
 
-<p align="center">
-  <img src="images/PeerHive.png" width="240" alt="Logo PeerHive">
-</p>
+## Descripción General
 
-<!-- Botón al branch main de PeerHive -->
-<p align="center">
-  <a href="https://github.com/David-Alcocer/PeerHive/tree/main" target="_blank" rel="noopener">
-    <img alt="Ir a main" src="https://img.shields.io/badge/Ir%20al%20branch%20main-000000?style=for-the-badge&logo=github">
-  </a>
-</p>
+PeerHive es una plataforma de asesorías académicas peer-to-peer que conecta estudiantes con asesores para mejorar el aprendizaje. El sistema cuenta con un backend FastAPI con MongoDB y un frontend Vanilla JavaScript.
 
-**PeerHive** es un sistema backend para la **administración de asesorías académicas**, diseñado para gestionar usuarios, sesiones, tickets de clases y comunicación en tiempo real entre estudiantes y asesores.
+### Características Principales
 
-Este proyecto surge como evolución del frontend desarrollado en el curso de Fundamentos de Software:
+- **Autenticación**: JWT + OAuth2 con Microsoft Entra ID
+- **Gestión de Solicitudes**: Estudiantes pueden crear solicitudes de asesoría
+- **Panel de Asesores**: Los asesores pueden aceptar y gestionar solicitudes
+- **Calendario**: Integración con Outlook Calendar
+- **Chat**: Mensajería en tiempo real entre estudiantes y asesores
+- **Integración Microsoft Teams**: Creación automática de reuniones
 
-🔗 Proyecto frontend original:  
-[Equipo-6-Fundamentos-De-Software](https://github.com/David-Alcocer/Equipo-6-Fundamentos-De-Software)
+## Estructura del Proyecto
 
-🔗 Repositorio actual (Backend):  
-[PeerHive](https://github.com/David-Alcocer/PeerHive)
+```
+PeerHive/
+├── backend/              # API FastAPI
+│   ├── app/
+│   │   ├── main.py       # Configuración principal
+│   │   ├── models.py     # Modelos de datos
+│   │   ├── services/     # Servicios (Teams, Calendar)
+│   │   ├── application/  # Casos de uso
+│   │   ├── domain/       # Entidades y repositorios
+│   │   └── infrastructure/ # Adaptadores
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── src/                  # Frontend Vanilla JS
+│   ├── ui/              # Componentes de UI
+│   ├── services/        # Servicios API
+│   ├── store/           # Estado de la aplicación
+│   ├── api/             # Configuración API
+│   └── utils/           # Utilidades
+│
+├── docs/                 # Documentación
+│   ├── DISTRIBUCION_TRABAJO_BACKEND.md
+│   ├── DISTRIBUCION_TRABAJO_FRONTEND.md
+│   ├── ARQUITECTURA_PEERHIVE.md
+│   ├── requirements.md
+│   └── ...
+│
+├── tests/                # Pruebas pytest
+├── index.html            # Página principal
+├── style.css            # Estilos
+├── docker-compose.yml
+└── README.md
+```
+
+## Tech Stack
+
+| Componente | Tecnología |
+|------------|------------|
+| Backend | FastAPI |
+| Base de Datos | MongoDB |
+| Autenticación | JWT + OAuth2 (Microsoft Entra ID) |
+| Frontend | Vanilla JavaScript (SPA) |
+| Calendario | Microsoft Graph API |
+| Reuniones | Microsoft Teams |
+| Testing | pytest |
+| CI/CD | GitHub Actions |
+
+## Inicio Rápido
+
+### Requisitos
+
+- Python 3.11+
+- Docker y Docker Compose
+- MongoDB (incluido en docker-compose)
+- Node.js (opcional, para desarrollo frontend)
+
+### Instalación
+
+```bash
+# 1. Copiar variables de entorno
+cp .env.example .env
+
+# 2. Iniciar servicios
+docker-compose up -d
+
+# 3. Acceder a la aplicación
+# Frontend: http://localhost
+# Backend API: http://localhost:8000
+# Swagger: http://localhost:8000/docs
+```
+
+### Desarrollo Local
+
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Frontend (servidor estático)
+# Abrir index.html en navegador o usar servidor estático
+python -m http.server 8000
+```
+
+## Roles de Usuario
+
+| Rol | Descripción |
+|-----|-------------|
+| **Estudiante** | Puede crear solicitudes de asesoría, chatear con asesores |
+| **Asesor** | Puede aceptar solicitudes, gestionar materias, chatear con estudiantes |
+| **Admin** | Acceso completo, gestión de usuarios y reportes |
+
+## Cuentas Demo
+
+- **Administrador**: admin@demo.com / admin
+- **Asesor**: asesor@demo.com / asesor
+- **Estudiante**: estudiante@demo.com / estudiante
+
+## Documentación
+
+La documentación detallada se encuentra en la carpeta [`docs/`](docs/):
+
+- [`docs/DISTRIBUCION_TRABAJO_FRONTEND.md`](docs/DISTRIBUCION_TRABAJO_FRONTEND.md) - Gaps y distribución del frontend
+- [`docs/DISTRIBUCION_TRABAJO_BACKEND.md`](docs/DISTRIBUCION_TRABAJO_BACKEND.md) - Distribución del backend
+- [`docs/ARQUITECTURA_PEERHIVE.md`](docs/ARQUITECTURA_PEERHIVE.md) - Arquitectura del proyecto
+- [`docs/requirements.md`](docs/requirements.md) - Requisitos funcionales
+
+## API Endpoints
+
+### Autenticación
+
+```
+GET  /api/auth/login
+GET  /api/auth/callback
+GET  /api/auth/logout
+GET  /api/auth/me
+```
+
+### Usuarios
+
+```
+GET    /api/users
+GET    /api/users/{id}
+POST   /api/users
+PUT    /api/users/{id}
+DELETE /api/users/{id}
+```
+
+### Solicitudes
+
+```
+GET    /api/requests
+GET    /api/requests/{id}
+POST   /api/requests
+PUT    /api/requests/{id}
+DELETE /api/requests/{id}
+```
+
+### Sesiones
+
+```
+GET    /api/sessions
+GET    /api/sessions/{id}
+POST   /api/sessions
+PUT    /api/sessions/{id}
+```
+
+### Microsoft Graph
+
+```
+GET  /calendar/events
+POST /calendar/events
+POST /teams/meetings
+GET  /teams/meetings/{id}/attendance
+```
+
+## Contribuidores
+
+- Equipo de desarrollo PeerHive
 
 ---
 
-## 📌 ¿Qué es PeerHive?
-
-PeerHive es una API REST construida con [FastAPI](https://fastapi.tiangolo.com/) que permite:
-
-- 🔐 Autenticación con [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
-- 👤 Gestión y CRUD de usuarios
-- 🎫 Creación y asignación de tickets de asesorías
-- 💬 Sistema de chat en tiempo real con WebSockets
-- 🗓️ Gestión de calendario basado en relaciones usuario-estudiante
-- 🛡️ Administración de sesiones y verificación de roles
-- 📡 Integración con APIs externas como [Microsoft Graph](https://learn.microsoft.com/graph/overview)
-
-PeerHive funciona como el **motor lógico y de seguridad** que puede ser consumido por cualquier cliente frontend (web, móvil o SPA).
-
----
-
-## 🎯 Objetivos del Backend
-
-### 1️⃣ Centralizar la lógica de negocio
-Separar completamente la lógica del frontend para garantizar escalabilidad y mantenibilidad.
-
-### 2️⃣ Implementar autenticación segura
-Integración con:
-- [OAuth 2.0](https://oauth.net/2/)
-- [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
-
-Para asegurar inicio de sesión institucional y protección de rutas.
-
-### 3️⃣ Gestionar el ciclo completo de asesorías
-
-- Crear tickets de clase
-- Asignar asesores
-- Registrar estado de asesorías
-- Administrar usuarios (estudiantes, asesores, admins)
-
-### 4️⃣ Implementar comunicación en tiempo real
-
-Uso de:
-- [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
-- Soporte nativo en [FastAPI](https://fastapi.tiangolo.com/advanced/websockets/)
-
-Para chat entre usuarios dentro de la plataforma.
-
-### 5️⃣ Exponer una API documentada automáticamente
-
-Documentación interactiva generada con:
-- [OpenAPI](https://www.openapis.org/)
-- [Swagger UI](https://swagger.io/tools/swagger-ui/)
-
-Disponible en:
-- `/docs`
-- `/redoc`
-
----
-
-## 🏗️ Arquitectura
-
-PeerHive sigue una arquitectura modular basada en:
-
-- API REST
-- Controladores separados por dominio
-- Validación con Pydantic
-- Gestión de configuración con variables de entorno
-- Soporte para contenedores con [Docker](https://www.docker.com/)
-
----
-
-## 🔐 Seguridad
-
-- Autenticación basada en tokens OAuth2
-- Manejo de sesiones
-- Rutas protegidas
-- Separación de roles (usuario / asesor / admin)
-- Integración con Microsoft Graph API
-
----
-
-## 🚀 Tecnologías utilizadas
-
-- [Python](https://www.python.org/)
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Uvicorn](https://www.uvicorn.org/)
-- [Pydantic](https://docs.pydantic.dev/)
-- [Microsoft Entra ID](https://learn.microsoft.com/entra/identity/)
-- [Microsoft Graph API](https://learn.microsoft.com/graph/overview)
-- [Docker](https://www.docker.com/)
-
----
-
-## 🧩 Enfoque del Proyecto
-
-PeerHive está diseñado como:
-
-- Backend independiente
-- Escalable
-- Modular
-- Preparado para integrarse con múltiples frontends
-- Enfocado en buenas prácticas de autenticación y arquitectura API
-
----
-
-## 📄 Licencia
-
-Pendiente de definir.
-
+*PeerHive – Conectando estudiantes y asesores académicos*
