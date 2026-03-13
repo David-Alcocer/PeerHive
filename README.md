@@ -173,7 +173,6 @@ GET  /teams/meetings/{id}/attendance
 
 ## Contribuidores
 
-- **freddie Uitzil** - Desarrollo inicial
 - Equipo de desarrollo PeerHive
 
 ---
