@@ -3,7 +3,7 @@
 // ===============================
 
 import { STORAGE_KEY } from '../api/config.js';
-import { DEMO_USERS } from '../api/mock.js';
+import { DEMO_USERS_PUBLIC } from '../api/mock.js';
 import { showToast } from '../utils/helpers.js';
 
 class AppState {
@@ -15,7 +15,7 @@ class AppState {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
             return {
-                users: [...DEMO_USERS], // Clone to avoid mutation of constant
+                users: [...DEMO_USERS_PUBLIC], // Clone to avoid mutation of constant
                 currentUserId: null,
                 requests: [],
                 sessions: [],
@@ -30,7 +30,7 @@ class AppState {
 
             // Validar y normalizar estructura
             if (!parsed.users || !Array.isArray(parsed.users)) {
-                parsed.users = [...DEMO_USERS];
+                parsed.users = [...DEMO_USERS_PUBLIC];
             }
 
             if (!parsed.requests || !Array.isArray(parsed.requests)) {
@@ -62,7 +62,7 @@ class AppState {
         } catch (error) {
             console.error('Error loading state:', error);
             return {
-                users: [...DEMO_USERS],
+                users: [...DEMO_USERS_PUBLIC],
                 currentUserId: null,
                 requests: [],
                 sessions: [],

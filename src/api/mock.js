@@ -1,21 +1,17 @@
 // ===============================
-// Datos Mock (Simulación Backend)
-// ===============================
+// Datos Mock - Información Pública de Usuarios
+// ==============================================================
+// NOTA: Este archivo SOLO contiene información pública de usuarios.
+// Las contraseñas NUNCA deben estar en el cliente.
+// La autenticación real se realiza mediante JWT con el backend.
 
-// Función de hash básica para seguridad en demo (Requerida aquí o en helpers, 
-// pero como se usa para definir los usuarios, la importaremos de helpers si es posible,
-// o la duplicamos para evitar ciclos si helpers depende de esto.
-// Mejor opción: Mover hashPassword a helpers y usarla aquí.
-
-import { hashPassword } from '../utils/helpers.js';
-
-export const DEMO_USERS = [
+// Usuarios de demostración (sin contraseñas - solo datos públicos)
+export const DEMO_USERS_PUBLIC = [
     {
         id: "u-admin",
         name: "Admin Demo",
         email: "admin@demo.com",
-        password: hashPassword("admin"),
-        role: "admin",
+        role: "admin", //La contrasela admin se ha removido para mayor seguridad
         subjects: [],
         isAdvisorApproved: true,
         createdAt: new Date().toISOString()
@@ -24,7 +20,6 @@ export const DEMO_USERS = [
         id: "u-asesor",
         name: "Asesor Demo",
         email: "asesor@demo.com",
-        password: hashPassword("asesor"),
         role: "advisor",
         subjects: ["Algoritmia", "Programación Orientada a Objetos"],
         isAdvisorApproved: true,
@@ -34,10 +29,16 @@ export const DEMO_USERS = [
         id: "u-estudiante",
         name: "Estudiante Demo",
         email: "estudiante@demo.com",
-        password: hashPassword("estudiante"),
         role: "student",
         subjects: [],
         isAdvisorApproved: false,
         createdAt: new Date().toISOString()
     },
 ];
+
+// =============================================================================
+// ADVERTENCIA DE SEGURIDAD
+// =============================================================================
+// Las contraseñas NUNCA deben estar en el código del cliente.
+// Este archivo es solo para información pública de usuarios.
+// La autenticación debe realizarse mediante el endpoint /api/auth/login del backend.
