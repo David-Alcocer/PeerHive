@@ -8,7 +8,7 @@ Este documento define las **Historias de Usuario (HU)** y los **Requisitos No Fu
 - Sistema de tickets
 - Chat con WebSockets
 - Integración con Microsoft Graph / Teams
-- Validación de asesores mediante **captura de pantalla del semestre equivalente (NO PDF)**
+- Validación automática de asesores mediante **Listas Blancas Institucionales**
 
 ---
 
@@ -18,8 +18,8 @@ Este documento define las **Historias de Usuario (HU)** y los **Requisitos No Fu
 |----|--------|--------|---------------------|--------------------------|-----------|
 | HU-001 | Autenticación | Usuario | Como usuario quiero iniciar sesión mediante Microsoft Entra ID para validar que pertenezco a la universidad. | El backend valida token OAuth2, obtiene información desde Microsoft Graph y crea/actualiza el usuario en la base de datos. | Alta |
 | HU-002 | Roles | Usuario | Como usuario quiero seleccionar si soy asesor o aprendiz para habilitar funcionalidades específicas. | El rol se guarda en base de datos y define acceso a endpoints protegidos. | Alta |
-| HU-003 | Validación asesor | Usuario (Asesor) | Como aspirante a asesor quiero subir una **captura de pantalla del semestre equivalente** para validar que cumplo los requisitos académicos. | El sistema acepta imágenes (jpg/png), guarda el archivo, marca el estado como "pendiente" y requiere aprobación de admin. | Alta |
-| HU-004 | Administración | Administrador | Como administrador quiero aprobar o rechazar solicitudes de asesores para controlar quién puede brindar asesorías. | El admin puede cambiar el estado a aprobado o rechazado y notificar al usuario. | Alta |
+| HU-003 | Validación asesor | Usuario (Asesor) | Como aspirante a asesor quiero iniciar sesión y que mi rol se asigne automáticamente si tengo permiso administrativo. | El sistema verifica el correo frente a la Lista Blanca y asciende el rol inmediatamente sin intervención humana. | Alta |
+| HU-004 | Administración | Administrador | Como administrador quiero subir/administrar correos institucionales de alumnos idóneos a la Lista Blanca para facultarlos como asesores. | Existen endpoints y UI de admin para registrar emails de manera masiva o individual a la base de datos de control. | Alta |
 | HU-005 | Usuarios | Administrador | Como administrador quiero realizar CRUD de usuarios para gestionar cuentas dentro del sistema. | Existen endpoints protegidos para crear, consultar, actualizar y desactivar usuarios. | Alta |
 | HU-006 | Tickets | Aprendiz | Como aprendiz quiero crear un ticket de asesoría especificando materia y descripción para solicitar ayuda. | El ticket se crea con estado "abierto" y queda disponible para asesores. | Alta |
 | HU-007 | Tickets | Asesor | Como asesor quiero ver tickets disponibles para aceptarlos según mi disponibilidad. | El backend lista tickets filtrables por materia y estado. | Alta |
@@ -40,32 +40,33 @@ Este documento define las **Historias de Usuario (HU)** y los **Requisitos No Fu
 | RNF-001 | Seguridad | Toda autenticación debe realizarse mediante OAuth2 con validación de token JWT emitido por Microsoft Entra ID. |
 | RNF-002 | Seguridad | Los endpoints protegidos deben validar rol y estado del usuario antes de permitir acceso. |
 | RNF-003 | Seguridad | Las contraseñas locales (si existieran) deben almacenarse con hashing seguro (bcrypt o equivalente). |
-| RNF-004 | Seguridad | Los archivos de validación (captura de semestre equivalente) deben almacenarse de forma segura y no exponerse públicamente. |
+| RNF-004 | Seguridad | Las listas de correos autorizados no deben exponerse públicamente, estando protegidas en endpoints exclusivos de admin. |
 | RNF-005 | Seguridad | Las conexiones WebSocket deben requerir autenticación previa. |
 | RNF-006 | Rendimiento | El tiempo de respuesta promedio de la API no debe superar 500 ms bajo carga normal. |
 | RNF-007 | Escalabilidad | El sistema debe estar preparado para ejecutarse en contenedores Docker. |
 | RNF-008 | Disponibilidad | El sistema debe soportar múltiples conexiones simultáneas en el chat sin degradación crítica. |
 | RNF-009 | Integridad | Un ticket no puede ser aceptado por más de un asesor. |
-| RNF-010 | Validación académica | El sistema debe permitir únicamente imágenes (jpg, png) como comprobante de semestre equivalente. No se aceptan archivos PDF. |
-| RNF-011 | Auditoría | El backend debe registrar cambios críticos como: cambio de rol, aprobación de asesor y cierre de ticket. |
+| RNF-010 | Validación académica | El sistema descarta comprobantes locales físicos. Opera estrictamente validando correos contra la lista interina de confianza académica. |
+| RNF-011 | Auditoría | El backend debe registrar cambios críticos como: cambio de rol, alteración de listas blancas, y cierre de ticket. |
 | RNF-012 | Documentación | La API debe contar con documentación automática accesible en `/docs` y `/redoc`. |
 | RNF-013 | Manejo de errores | El backend debe retornar códigos HTTP estándar y mensajes claros en formato JSON. |
 | RNF-014 | Backup | La base de datos debe contar con respaldo periódico configurable. |
-| RNF-015 | Control de acceso | Solo administradores pueden aprobar asesores o modificar roles. |
+| RNF-015 | Control de acceso | Solo administradores (p. ej. Secretaría) pueden agregar/remover correos de la Lista Blanca u otorgar roles. |
 | RNF-016 | Integración externa | La generación de enlaces de Teams debe depender de Microsoft Graph y manejar fallos externos adecuadamente. |
-| RNF-017 | Límite de carga | El sistema debe limitar tamaño de archivos de validación a máximo 5 MB. |
+| RNF-017 | Eficiencia de Servidor | Ya no se requiere almacenar archivos multimedia (ahorro de espacio). La validación corre 100% sobre String matching agilizando BD. |
 | RNF-018 | Consistencia de datos | Las transiciones de estado de ticket deben seguir flujo controlado: abierto → asignado → cerrado. |
 
 ---
 
-# Cambios Clave Respecto a la Versión Anterior
+# 📌 Cambios Clave Respecto a la Versión Anterior
 
-- Eliminado: Kardex en PDF.
-- Nuevo método de validación: **Captura de pantalla del semestre equivalente**.
-- Refuerzo en autenticación con Microsoft Entra ID.
-- Chat implementado con WebSockets autenticados.
-- Control estricto de estados de tickets.
-- Integración formal con Microsoft Graph para Teams.
+- ❌ Eliminado: Kardex en PDF.
+- ✅ Nuevo método de validación Cero-Fricciones: **Filtro Automático por Lista Blanca Institucional (Pre-Aprobación)**. Eliminación total de cargas de evidencias fotográficas.
+- 🔐 Refuerzo en autenticación con Microsoft Entra ID.
+- 💬 Chat implementado con WebSockets autenticados.
+- 🎫 Control estricto de estados de tickets.
+- 📡 Integración formal con Microsoft Graph para Teams.
+
 ---
 
 Este documento refleja la arquitectura y reglas reales implementadas en el **Backend actual de PeerHive**.
