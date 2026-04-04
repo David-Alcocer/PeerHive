@@ -10,8 +10,9 @@ PeerHive es una plataforma de asesorías académicas peer-to-peer que conecta es
 - **Gestión de Solicitudes**: Estudiantes pueden crear solicitudes de asesoría
 - **Panel de Asesores**: Los asesores pueden aceptar y gestionar solicitudes
 - **Calendario**: Integración con Outlook Calendar
-- **Chat**: Mensajería en tiempo real entre estudiantes y asesores
+- **Chat**: Mensajería en tiempo real entre estudiantes y asesores con soporte para escalamiento
 - **Integración Microsoft Teams**: Creación automática de reuniones
+- **Seguridad Institucional**: Validación "Cero-Fricciones" de Asesores mediante Listas Blancas (Whitelist), eliminando procesos manuales.
 
 ## Estructura del Proyecto
 
@@ -105,7 +106,7 @@ python -m http.server 8000
 |-----|-------------|
 | **Estudiante** | Puede crear solicitudes de asesoría, chatear con asesores |
 | **Asesor** | Puede aceptar solicitudes, gestionar materias, chatear con estudiantes |
-| **Admin** | Acceso completo, gestión de usuarios y reportes |
+| **Admin** | Acceso completo, gestión de la Lista Blanca (Whitelist) de asesores y reportes |
 
 ## Cuentas Demo
 
@@ -121,6 +122,8 @@ La documentación detallada se encuentra en la carpeta [`docs/`](docs/):
 - [`docs/DISTRIBUCION_TRABAJO_BACKEND.md`](docs/DISTRIBUCION_TRABAJO_BACKEND.md) - Distribución del backend
 - [`docs/ARQUITECTURA_PEERHIVE.md`](docs/ARQUITECTURA_PEERHIVE.md) - Arquitectura del proyecto
 - [`docs/requirements.md`](docs/requirements.md) - Requisitos funcionales
+- [`docs/peerhive_analysis_v2.md`](docs/peerhive_analysis_v2.md) - Análisis técnico y estrategia Single-Tenant
+- [`docs/cronograma_sprints_gitflow.md`](docs/cronograma_sprints_gitflow.md) - Cronograma de Sprints y protocolo Git Flow
 
 ## API Endpoints
 
